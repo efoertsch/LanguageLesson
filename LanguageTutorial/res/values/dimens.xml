@@ -1,0 +1,29 @@
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- px (pixel) actual pixel on screen -->
+    <!-- sp (scale independent pixel) is used for font sizes -->
+    <!-- dp (density independent pixel) is used for everything else -->
+    <dimen name="ts20sp">20sp</dimen>
+    <dimen name="ts1sp">1sp</dimen>
+    <dimen name="ts2sp">2sp</dimen>
+    <dimen name="ts3sp">3sp</dimen>
+    <dimen name="ts10sp">10sp</dimen>
+    <dimen name="ts30sp">30sp</dimen>
+    <dimen name="ts40sp">40sp</dimen>
+    <dimen name="ts50sp">50sp</dimen>
+    <dimen name="ts60sp">60sp</dimen>
+    <dimen name="ts70sp">70sp</dimen>
+    <dimen name="ts80sp">80sp</dimen>
+    <dimen name="ts90sp">90sp</dimen>
+    <dimen name="ts100sp">100sp</dimen>
+    <dimen name="default_gap">16dp</dimen>
+    <dimen name="gap_8dp">8dp</dimen>
+    <dimen name="gap_16dp">16dp</dimen>
+    <dimen name="gap_24dp">24dp</dimen>
+     <dimen name="gap_32dp">32dp</dimen>
+
+</resources>

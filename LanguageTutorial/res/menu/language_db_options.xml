@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/load_language_file"
+        android:title="@string/load_language_file"
+        android:showAsAction="ifRoom|withText"/>
+    <item
+        android:id="@+id/delete_teacher_language_class"
+        android:title="@string/delete_teacher_language"
+        android:showAsAction="ifRoom|withText"/>
+    <item
+        android:id="@+id/cancel_task"
+        android:title="@string/cancel_task"
+        android:visible="false"
+        android:showAsAction="ifRoom|withText"/>
+    <item
+        android:id="@+id/reset_background_task"
+        android:title="@string/reset"
+        android:visible="false"
+        android:showAsAction="ifRoom|withText"/>
+     <item
+        android:id="@+id/backup_restore_language_database"
+        android:title="@string/backup_restore_database"
+        android:visible="true"
+        android:showAsAction="ifRoom|withText"/>
+
+</menu>

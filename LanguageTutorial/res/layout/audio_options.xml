@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+   <!--   <include
+        android:id="@+id/includerlSaveCancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        layout="@layout/save_cancel_buttons" />
+   -->
+
+    <!-- If layout_above not used then scrollview overlaps the Save/Cancel buttons -->
+	<!--    android:layout_above="@+id/includerlSaveCancel"  -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+         android:layout_alignParentTop="true" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            android:scrollbarStyle="outsideOverlay"
+            android:scrollbars="vertical" >
+
+            <View style="@style/Divider" />
+
+            <RelativeLayout
+                android:id="@+id/rlPlayAudio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <CheckBox
+                    android:id="@+id/cbxPlayAudioWhenAvailable"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:text="@string/play_audio_when_available" />
+            </RelativeLayout>
+
+            <View style="@style/Divider" />
+
+            <RelativeLayout
+                android:id="@+id/rlRepeatPhrase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <CheckBox
+                    android:id="@+id/cbxRepeatPhrase"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:text="@string/repeat_phrase" />
+
+                <TextView
+                    android:id="@+id/lblRepeatXTimes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/cbxRepeatPhrase"
+                    android:paddingLeft="@dimen/gap_8dp"
+                    android:text="@string/repeat_this_number_of_times"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/etRepeatXTimes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/lblRepeatXTimes"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/cbxRepeatPhrase"
+                    android:layout_marginLeft="@dimen/gap_16dp"
+                    android:layout_toRightOf="@+id/lblRepeatXTimes"
+                    android:inputType="number"
+                    android:maxEms="3"
+                    android:paddingLeft="@dimen/ts2sp" />
+
+                <TextView
+                    android:id="@+id/lblPauseBetweenRepeat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/etRepeatXTimes"
+                    android:paddingLeft="@dimen/gap_8dp"
+                    android:text="@string/pause_between_repeats"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:id="@+id/lblPhraseDelayByDuration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/lblPauseBetweenRepeat"
+                    android:layout_toLeftOf="@+id/etWaitXSeconds"
+                    android:maxLines="3"
+                    android:paddingLeft="@dimen/gap_16dp"
+                    android:text="@string/by_phrase_duration_times_this_number"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/etPhraseDelayByDuration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/lblPhraseDelayByDuration"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="@dimen/gap_16dp"
+                    android:layout_toRightOf="@+id/lblPhraseDelayByDuration"
+                    android:inputType="number|numberDecimal"
+                    android:maxEms="4" />
+
+                <TextView
+                    android:id="@+id/lblWaitXSeconds"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignRight="@+id/lblPauseBetweenRepeat"
+                    android:layout_below="@+id/lblPhraseDelayByDuration"
+                    android:layout_marginLeft="@dimen/gap_16dp"
+                    android:text="@string/wait_this_many_seconds"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/etWaitXSeconds"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/lblWaitXSeconds"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/etPhraseDelayByDuration"
+                    android:layout_marginLeft="@dimen/gap_16dp"
+                    android:layout_toRightOf="@+id/lblWaitXSeconds"
+                    android:inputType="number|numberDecimal"
+                    android:maxEms="4" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rlPlayKnownPhrase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <CheckBox
+                    android:id="@+id/cbxPlayKnownPhrase"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:text="@string/play_known_phrase_when_available" />
+
+                <RadioGroup
+                    android:id="@+id/rgBeforeAfter"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/cbxPlayKnownPhrase"
+                    android:orientation="vertical"
+                    android:paddingLeft="@dimen/gap_8dp" >
+
+                    <RadioButton
+                        android:id="@+id/rbtnBeforeLearningPhrase"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/before_learning_phrase" />
+
+                    <RadioButton
+                        android:id="@+id/rbtnAfterLearningPhrase"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/after_learning_phrase" />
+                </RadioGroup>
+            </RelativeLayout>
+
+            <View style="@style/Divider" />
+
+            <!-- step automatically not currently implemented -->
+            <RelativeLayout
+                android:id="@+id/rlStepAutomatically"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" >
+
+                <CheckBox
+                    android:id="@+id/cbxStepAutomatically"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:text="@string/step_through_lesson_automatically" />
+            </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

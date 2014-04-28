@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/border_black_rounded_corner"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/lessonHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/tvHeader"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <View style="@style/Divider"
+            android:layout_below="@+id/tvHeader"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/buttonfooter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
+
+        <View style="@style/Divider" />
+
+        <Button
+            android:id="@+id/btnPrevious"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:enabled="true"
+            android:text="@string/prev"
+            android:visibility="visible" />
+        
+          <Button
+            android:id="@+id/btnRepeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:enabled="true"
+            android:text="@string/repeat"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:enabled="true"
+            android:text="@string/next"
+            android:visibility="visible" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@id/android:list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/buttonfooter"
+        android:layout_below="@+id/lessonHeader"
+        android:clickable="true"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:footerDividersEnabled="true"
+        android:headerDividersEnabled="true"
+        android:isScrollContainer="true"
+        android:scrollbars="vertical" />
+
+</RelativeLayout>
