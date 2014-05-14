@@ -1,0 +1,3 @@
+<p>It doesn't look like a language file has been loaded yet. To load an example of Turkish lessons, click on menu, select Load Language File/From the web, and use the default web address.</p>
+
+<p>Go to http://fisincorporated.com/language-lesson for more information on creating and loading language lessons.</p>

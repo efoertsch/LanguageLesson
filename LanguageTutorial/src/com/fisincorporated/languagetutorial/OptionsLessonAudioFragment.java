@@ -1,41 +1,30 @@
 package com.fisincorporated.languagetutorial;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import com.fisincorporated.languagetutorial.utility.InputFilterMinMax;
 import com.fisincorporated.languagetutorial.utility.InputFloatFilterMinMax;
 
-public class LessonAudioOptionsFragment extends OptionsFragment {
-	private static final String  TAG = "LessonAudioOptionsFragment";
-//	private Button btnSave;
-//	private Button btnCancel;
+public class OptionsLessonAudioFragment extends OptionsFragment {
+	private static final String TAG = "OptionsLessonAudioFragment";
+	// private Button btnSave;
+	// private Button btnCancel;
 	private CheckBox cbxPlayAudioWhenAvailable;
 	private CheckBox cbxRepeatPhrase;
 	private EditText etRepeatXTimes;
 	private EditText etPhraseDelayByDuration;
 	private EditText etWaitXSeconds;
 	private CheckBox cbxPlayKnownPhrase;
-	//private RadioGroup rgBeforeAfter;
+	// private RadioGroup rgBeforeAfter;
 	private RadioButton rbtnBeforeLearningPhrase;
 	private RadioButton rbtnAfterLearningPhrase;
 	private CheckBox cbxStepAutomatically;
@@ -64,38 +53,43 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 
 	public static OptionsFragment getInstance() {
 		if (lessonAudioOptionsFragment == null) {
-			lessonAudioOptionsFragment = new LessonAudioOptionsFragment();
+			lessonAudioOptionsFragment = new OptionsLessonAudioFragment();
 		}
 		return lessonAudioOptionsFragment;
 	}
- 
-	 
+
 	protected int getMainLayout() {
-		// TODO Auto-generated method stub
 		return R.layout.audio_options;
 	}
-	
-	 
+
 	@Override
-	public void onResume(){
-		//   TextWatchers fired during orientation change - when no data changes have occurred and cause the change flag to be
-		// set when it should not, so add TextWatchers here (after data assigned (I hope)
+	public void onResume() {
+		// TextWatchers fired during orientation change - when no data changes
+		// have occurred and cause the change flag to be
+		// set when it should not, so add TextWatchers here after data assigned (I
+		// hope)
 		// and remove on onPause()
 		ignoreTextChanges = false;
-		 etRepeatXTimes.addTextChangedListener(new DataTextWatcher(etRepeatXTimes));
-		etPhraseDelayByDuration.addTextChangedListener(new DataTextWatcher(etPhraseDelayByDuration));
-		etWaitXSeconds.addTextChangedListener(new DataTextWatcher(etWaitXSeconds));
-		Log.i(TAG, "onResume() ignoreTextChanges set to" + ignoreTextChanges + "  and added textwatchers");
+		etRepeatXTimes
+				.addTextChangedListener(new DataTextWatcher(etRepeatXTimes));
+		etPhraseDelayByDuration.addTextChangedListener(new DataTextWatcher(
+				etPhraseDelayByDuration));
+		etWaitXSeconds
+				.addTextChangedListener(new DataTextWatcher(etWaitXSeconds));
+		Log.i(TAG, "onResume() ignoreTextChanges set to" + ignoreTextChanges
+				+ "  and added textwatchers");
 		super.onResume();
 	}
-	@Override 
-	public void onPause(){
+
+	@Override
+	public void onPause() {
 		super.onPause();
-		 etRepeatXTimes.addTextChangedListener(null);
-			etPhraseDelayByDuration.addTextChangedListener(null);
-			etWaitXSeconds.addTextChangedListener(null);
+		etRepeatXTimes.addTextChangedListener(null);
+		etPhraseDelayByDuration.addTextChangedListener(null);
+		etWaitXSeconds.addTextChangedListener(null);
 		ignoreTextChanges = true;
-		Log.i(TAG, "onPause() ignoreTextChanges set to" + ignoreTextChanges + " and removed textwatchers");
+		Log.i(TAG, "onPause() ignoreTextChanges set to" + ignoreTextChanges
+				+ " and removed textwatchers");
 	}
 
 	protected void getLayoutFields(View view) {
@@ -127,10 +121,8 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 		etRepeatXTimes = (EditText) view.findViewById(R.id.etRepeatXTimes);
 		etPhraseDelayByDuration = (EditText) view
 				.findViewById(R.id.etPhraseDelayByDuration);
-		
 
 		etWaitXSeconds = (EditText) view.findViewById(R.id.etWaitXSeconds);
-		
 
 		cbxPlayKnownPhrase = (CheckBox) view
 				.findViewById(R.id.cbxPlayKnownPhrase);
@@ -145,8 +137,8 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 			}
 		});
 
-		//rgBeforeAfter = (RadioGroup) view.findViewById(R.id.rgBeforeAfter);
-		
+		// rgBeforeAfter = (RadioGroup) view.findViewById(R.id.rgBeforeAfter);
+
 		rbtnBeforeLearningPhrase = (RadioButton) view
 				.findViewById(R.id.rbtnBeforeLearningPhrase);
 		rbtnBeforeLearningPhrase.setOnClickListener(new OnClickListener() {
@@ -154,9 +146,10 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 			public void onClick(View arg0) {
 				if (ignoreTextChanges)
 					return;
-				beforeLearningPhrase = rbtnBeforeLearningPhrase.isSelected();
-				afterLearningPhrase = !rbtnBeforeLearningPhrase.isSelected();
+				beforeLearningPhrase = rbtnBeforeLearningPhrase.isChecked();
+				afterLearningPhrase = !rbtnBeforeLearningPhrase.isChecked();
 				notifyOptionsChanged();
+				notifytBeforeAfterOptionChanged( 1);
 			}
 		});
 		rbtnAfterLearningPhrase = (RadioButton) view
@@ -166,9 +159,10 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 			public void onClick(View arg0) {
 				if (ignoreTextChanges)
 					return;
-				afterLearningPhrase = rbtnAfterLearningPhrase.isSelected();
-				beforeLearningPhrase = !rbtnAfterLearningPhrase.isSelected();
+				afterLearningPhrase = rbtnAfterLearningPhrase.isChecked();
+				beforeLearningPhrase = !rbtnAfterLearningPhrase.isChecked();
 				notifyOptionsChanged();
+				notifytBeforeAfterOptionChanged( 2);
 			}
 		});
 
@@ -184,41 +178,27 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 			}
 		});
 
-//		btnSave = (Button) view.findViewById(R.id.btnSave);
-//
-//		btnSave.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				if (validEntries()) {
-//					storeOptionSettings();
-//					Toast.makeText(getActivity(), R.string.audio_options_saved,
-//							Toast.LENGTH_SHORT).show();
-// 					returnToCaller(Activity.RESULT_OK);
-//					// getActivity().finish();
-//				}
-//			}
-//
-//		});
-//		btnCancel = (Button) view.findViewById(R.id.btnCancel);
-//		btnCancel.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				notifyOptionChangesCancelled();
-//				returnToCaller(Activity.RESULT_CANCELED);
-//				// Toast.makeText(getActivity(),
-//				// res.getString(R.string.changes_canceled_options_not_updated),
-//				// Toast.LENGTH_SHORT);
-//				getActivity().finish();
-//
-//			}
-//		});
 		cbxPlayAudioWhenAvailable.setFocusableInTouchMode(true);
 
 	}
 
-	private void returnToCaller(int returnResult) {
-		getActivity().setResult(returnResult, null);
-		// getActivity().getSupportFragmentManager().popBackStack();
+//	private void returnToCaller(int returnResult) {
+//		getActivity().setResult(returnResult, null);
+//		// getActivity().getSupportFragmentManager().popBackStack();
+//	}
+	
+	// before = 1, after = 2
+	protected void syncBeforeAfter(int beforeAfter){
+		if (beforeAfter == 1){
+			rbtnBeforeLearningPhrase.setChecked(true);
+			rbtnAfterLearningPhrase.setChecked(false);
+		}
+		else {
+			rbtnBeforeLearningPhrase.setChecked(false);
+			rbtnAfterLearningPhrase.setChecked(true);
+		}
+		beforeLearningPhrase = rbtnBeforeLearningPhrase.isSelected();
+		afterLearningPhrase = !rbtnBeforeLearningPhrase.isSelected();
 	}
 
 	protected void checkForUpdates() {
@@ -251,7 +231,6 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 		stepAutomatically = languageSettings.getStepThroughLessonAutomatically();
 	}
 
-
 	protected void setOptionDisplayValues() {
 		ignoreTextChanges = true;
 		cbxPlayAudioWhenAvailable.setChecked(playAudioWhenAvailable);
@@ -279,9 +258,9 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 
 	private void enableDisableAudioOptions(boolean enable) {
 		cbxRepeatPhrase.setEnabled(enable);
-		//enableDisablePhraseRepeat(enable);
+		// enableDisablePhraseRepeat(enable);
 		cbxPlayKnownPhrase.setEnabled(enable);
-		//enableDisableBeforeAfter(enable);
+		// enableDisableBeforeAfter(enable);
 	}
 
 	private void enableDisablePhraseRepeat(boolean enable) {
@@ -291,27 +270,27 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 	}
 
 	private void enableDisableBeforeAfter(boolean enable) {
-		//rgBeforeAfter.setEnabled(enable);
+		// rgBeforeAfter.setEnabled(enable);
 		rbtnBeforeLearningPhrase.setEnabled(enable);
 		rbtnAfterLearningPhrase.setEnabled(enable);
 	}
 
-//	public boolean validEntries() {
-//		boolean validEntry = true;
-//		if (cbxRepeatPhrase.isChecked()) {
-//			if (!validRepeatXTimes()) return false;
-//			if (!validWaitXSeconds() || !validPhraseDelayByDuration()) return false;
-//			validEntry = validDurationValues();
-//		}
-//		return validEntry;
-//	}
-
-	
+	// public boolean validEntries() {
+	// boolean validEntry = true;
+	// if (cbxRepeatPhrase.isChecked()) {
+	// if (!validRepeatXTimes()) return false;
+	// if (!validWaitXSeconds() || !validPhraseDelayByDuration()) return false;
+	// validEntry = validDurationValues();
+	// }
+	// return validEntry;
+	// }
 
 	private boolean validRepeatXTimes() {
 		try {
-			repeatXTimes = Integer.parseInt(etRepeatXTimes.getText().toString().trim());
-			if (repeatXTimes != 0 ) waitXSeconds = 0;
+			repeatXTimes = Integer.parseInt(etRepeatXTimes.getText().toString()
+					.trim());
+			if (repeatXTimes != 0)
+				waitXSeconds = 0;
 		} catch (NumberFormatException nfe) {
 			showErrorDialog(res.getString(R.string.invalid_number_repeatXTimes,
 					minRepeat, maxRepeat));
@@ -319,12 +298,13 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 		}
 		return true;
 	}
- 
+
 	private boolean validWaitXSeconds() {
 		try {
 			waitXSeconds = Float.parseFloat(etWaitXSeconds.getText().toString()
 					.trim());
-			if (waitXSeconds != 0)  repeatXTimes = 0;
+			if (waitXSeconds != 0)
+				repeatXTimes = 0;
 		} catch (NumberFormatException nfe) {
 			showErrorDialog(res.getString(R.string.invalid_number_waitXSeconds,
 					minWaitXSeconds, maxWaitXSeconds,
@@ -333,21 +313,20 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 		}
 		return true;
 	}
-	
-	private boolean validPhraseDelayByDuration(){
-	try {
-		phraseDelayByDuration = Float.parseFloat(etPhraseDelayByDuration
-				.getText().toString().trim());
-	} catch (NumberFormatException nfe) {
-		showErrorDialog(res.getString(
-				R.string.invalid_pause_times_duration, minPauseTimesDuration,
-				maxPauseTimesDuration,
-				res.getString(R.string.wait_this_many_seconds)));
-		return false;
+
+	private boolean validPhraseDelayByDuration() {
+		try {
+			phraseDelayByDuration = Float.parseFloat(etPhraseDelayByDuration
+					.getText().toString().trim());
+		} catch (NumberFormatException nfe) {
+			showErrorDialog(res.getString(R.string.invalid_pause_times_duration,
+					minPauseTimesDuration, maxPauseTimesDuration,
+					res.getString(R.string.wait_this_many_seconds)));
+			return false;
+		}
+		return true;
 	}
-	return true;
-	}
-	
+
 	private boolean validDurationValues() {
 		if (waitXSeconds != 0 && phraseDelayByDuration != 0) {
 			showErrorDialog(res.getString(
@@ -374,7 +353,7 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 			int noResource, int cancelResource) {
 		dialog = LanguageDialogFragment.newInstance(-1, loadMsg, yesResource,
 				noResource, cancelResource);
-		dialog.setTargetFragment(LessonAudioOptionsFragment.this, requestCode);
+		dialog.setTargetFragment(OptionsLessonAudioFragment.this, requestCode);
 		dialog.show(getActivity().getSupportFragmentManager(), "errorDialog");
 	}
 
@@ -422,13 +401,15 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 		public void afterTextChanged(Editable editable) {
 			switch (view.getId()) {
 			case R.id.etRepeatXTimes:
-					validRepeatXTimes(); 
+				validRepeatXTimes();
 				break;
 			case R.id.etPhraseDelayByDuration:
-					if (validPhraseDelayByDuration()) validDurationValues() ;
+				if (validPhraseDelayByDuration())
+					validDurationValues();
 				break;
 			case R.id.etWaitXSeconds:
-					if (validWaitXSeconds()) validDurationValues() ;
+				if (validWaitXSeconds())
+					validDurationValues();
 				break;
 			}
 		}
@@ -450,13 +431,15 @@ public class LessonAudioOptionsFragment extends OptionsFragment {
 
 	@Override
 	public boolean isValidInput() {
-			boolean validEntry = true;
-			if (cbxRepeatPhrase.isChecked()) {
-				if (!validRepeatXTimes()) return false;
-				if (!validWaitXSeconds() || !validPhraseDelayByDuration()) return false;
-				validEntry = validDurationValues();
-			}
-			return validEntry;
+		boolean validEntry = true;
+		if (cbxRepeatPhrase.isChecked()) {
+			if (!validRepeatXTimes())
+				return false;
+			if (!validWaitXSeconds() || !validPhraseDelayByDuration())
+				return false;
+			validEntry = validDurationValues();
 		}
-	 
+		return validEntry;
+	}
+
 }

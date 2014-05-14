@@ -20,10 +20,10 @@ import android.widget.ProgressBar;
 //http://stackoverflow.com/questions/8417885/android-fragments-retaining-an-asynctask-during-screen-rotation-or-configuratio
 //http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html
 
-// Non-UI (a.k.a. headless) fragment that holds reference to Aysnc LanguageFileLoader
+// Non-UI (a.k.a. headless) fragment that holds reference to Aysnc LanguageFileLoaderAsync
 public class LoadFileTaskFragment extends Fragment {
 	// The task we are running.
-	private static LanguageFileLoader languageFileLoader = null;
+	private static LanguageFileLoaderAsync languageFileLoader = null;
 	private IAsyncCallBacks callBack;
 	private static LoadFileTaskFragment taskFragment = null;
 	private String TAG = "LoadFileTaskFragment";
@@ -74,7 +74,7 @@ public class LoadFileTaskFragment extends Fragment {
 		if (languageFileLoader != null){
 			languageFileLoader = null;
 		}
-		languageFileLoader = new LanguageFileLoader(taskFragment, file);
+		languageFileLoader = new LanguageFileLoaderAsync(taskFragment, file);
 		languageFileLoader.execute();
 	}
 

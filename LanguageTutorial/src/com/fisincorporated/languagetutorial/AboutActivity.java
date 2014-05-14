@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import com.fisincorporated.languagetutorial.utility.FileUtil;
+
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -25,44 +27,11 @@ public class AboutActivity   extends ActionBarActivity {
 		setContentView(R.layout.about_activity );
 		tvAbout = (TextView) findViewById(R.id.about_activity_tvAbout);
 		tvAbout.setMovementMethod(LinkMovementMethod.getInstance());
-		  tvAbout.setText(Html.fromHtml(loadAboutText()));
-		//tvAbout.setText(loadAboutText());
+		tvAbout.setText(Html.fromHtml(FileUtil.readAssetsText(this, "about.txt")));
+		 
 
 
 	}
 
-	// Keep just in case
-	@SuppressWarnings("finally")
-	private String loadAboutText() {
-		StringBuffer sb = new StringBuffer();
-		AssetManager assetManager = getResources().getAssets();
-		InputStream inputStream = null;
-
-		try {
-			inputStream = assetManager.open("about.txt");
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					inputStream));
-			String line = null;
-			while ((line = br.readLine()) != null) {
-				sb.append(line);
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			Toast.makeText(getApplicationContext(), "Oops About file is missing "
-					+ e.toString(), Toast.LENGTH_LONG).show();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			Toast.makeText(getApplicationContext(),
-					"Oops. Error reading About file" + e.toString(),
-					Toast.LENGTH_LONG).show();;
-		}
-		finally{
-			return sb.toString();
-		}
-		
-
-	}
-
-	 
-
+	
 }

@@ -23,6 +23,8 @@ public abstract class OptionsFragment extends MasterFragment {
 		  void optionsChanged();
 		  void optionsSaved();
 		  void optionChangesCancelled();
+		  // to keep audio and text in sync - before = 1 after = 2;
+		  void optionBeforeAfter(int beforeAfter);
 	}
 	
 	public OptionsFragment() {
@@ -67,14 +69,18 @@ public abstract class OptionsFragment extends MasterFragment {
 		 
 	public void onResume() {
 		super.onResume();
-//		setOptionDisplayValues();
-//		checkForUpdates();
+ 
 	}
 
 	protected abstract void checkForUpdates(); 
 
 	protected void notifyOptionsChanged(){
 		optionChangeCallback.optionsChanged();
+		
+	}
+	
+	protected void notifytBeforeAfterOptionChanged(int beforeAfter){
+		optionChangeCallback.optionBeforeAfter(beforeAfter);
 	}
 	
 	protected void notifyOptionsSaved(){
@@ -94,7 +100,9 @@ public abstract class OptionsFragment extends MasterFragment {
 	
 	protected abstract void setOptionDisplayValues();
 
-	public abstract boolean isValidInput() ;
+	protected abstract boolean isValidInput() ;
+
+	protected abstract void syncBeforeAfter(int beforeAfter) ;
 
 
 	

@@ -58,7 +58,7 @@ public class Version1 extends SchemaVersion {
 		lessonPhrase = addLessonPhraseEntity(schema);
 		compoundPhrase = addCompoundPhraseEntity(schema);
 		System.out.println("!!!!!!!!!!!!!!!!!!!");
-		System.out.println("If keep sections not being retained, add the following to Teacher, Class and Lesson");
+		System.out.println("If keep sections not being retained, compare the original and newly generated files as the keep sections aren't being kept");
 		System.out.println("import com.fisincorporated.languagetutorial.utility.DomainObject;");
 		System.out.println(" Class ...  implements DomainObject;");
 		System.out.println("public String toString(){   	"
@@ -247,8 +247,7 @@ public class Version1 extends SchemaVersion {
 		Property languageId = languagePhrase.addLongProperty("languageId")
 				.notNull().index().getProperty();
 		Property writtenPhrase =languagePhrase.addStringProperty("writtenPhrase").notNull().getProperty();
-		languagePhrase.addStringProperty("audioFile");
-		languagePhrase.addStringProperty("videoFile");
+		languagePhrase.addStringProperty("mediaFile");
 		languagePhrase.addStringProperty("phraseType").notNull();
 		languagePhrase.addStringProperty("pronunciation");
 		languagePhrase.addStringProperty("englishNumeral");

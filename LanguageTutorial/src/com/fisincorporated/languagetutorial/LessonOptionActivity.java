@@ -49,6 +49,7 @@ public class LessonOptionActivity extends ActionBarActivity implements
 		viewPager = (ViewPager) findViewById(R.id.pager);
 		actionBar = getSupportActionBar();
 		actionBar.setTitle(res.getString(R.string.options));
+		actionBar.setHomeButtonEnabled(true);
 		optionsPagerAdapter = new OptionsPagerAdapter(getSupportFragmentManager());
 
 		viewPager.setAdapter(optionsPagerAdapter);
@@ -72,13 +73,8 @@ public class LessonOptionActivity extends ActionBarActivity implements
 				// on changing the page
 				// make requested tab selected
 				goingToTabPosition = position;
-//				if (optionsChanged) {
-//					showSaveCancelDialog();
-//					return;
-//				} else {
-					actionBar.setSelectedNavigationItem(position);
-					currentTabPosition = position;
-//				}
+				actionBar.setSelectedNavigationItem(position);
+				currentTabPosition = position;
 			}
 
 			@Override
@@ -96,12 +92,6 @@ public class LessonOptionActivity extends ActionBarActivity implements
 		btnSave.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				//if (validateAndSave()) {
-//					Toast.makeText(getBaseContext(), R.string.options_saved,
-//							Toast.LENGTH_SHORT).show();
-//					 setResult(Activity.RESULT_OK, null);
-//					 finish();
-//			}
 				validateAndSave();
 			}
 		});
@@ -224,6 +214,16 @@ public class LessonOptionActivity extends ActionBarActivity implements
 	public void optionChangesCancelled() {
 		optionsChanged = false;
 
+	}
+
+	
+	@Override
+	public void optionBeforeAfter(int beforeAfter) {
+		for (int i = 0 ; i < optionsPagerAdapter.getCount(); ++i){
+			if (i != viewPager.getCurrentItem()){
+			((OptionsFragment)optionsPagerAdapter.getItem(i)).syncBeforeAfter(beforeAfter);
+			}
+		}
 	}
 
 }

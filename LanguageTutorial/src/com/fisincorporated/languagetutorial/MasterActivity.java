@@ -38,6 +38,7 @@ public abstract class MasterActivity extends ActionBarActivity implements
 		// do whatever needed
 		actionBar = getSupportActionBar();
 		actionBar.setTitle(getResources().getString(R.string.app_name));
+		actionBar.setHomeButtonEnabled(true);
 		
 		FragmentManager fm = getSupportFragmentManager();
 		Fragment fragment = fm.findFragmentById(R.id.fragmentContainer);

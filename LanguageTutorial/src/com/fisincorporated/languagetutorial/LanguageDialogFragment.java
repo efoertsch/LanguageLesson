@@ -9,6 +9,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
  
 // can be created/called from either Activity(use interface) or Fragment (use getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode,
 //intent);
@@ -17,13 +20,18 @@ public class LanguageDialogFragment extends DialogFragment  {
  public final static String DIALOG_RESPONSE = "com.fisincorporated.languagetutorial.dialog.response"; 
  public static final String TITLE = "Title";
 	public static final String MESSAGE = "Message";
+	public static final String DIALOG_VIEW_ID = "DialogViewId";
+	public static final String DIALOG_TEXT_VIEW_ID = "DialogTextViewId";
+	public static final String DEFAULT_TEXT = "DefaultText";
 	public static final String MESSAGE_STRING = "Message_String";
 	public static final String POSITIVE_BUTTON_MSG = "Positive_button_msg";
 	public static final String NEGATIVE_BUTTON_MSG = "Negative_button_msg";
 	public static final String NEUTRAL_BUTTON_MSG = "Neutral_button_msg";
+	public static final String LANGUAGE_DIALOG_TEXT_ENTRY = "LanguageDialogTextEntry";
 	
 	private  IDialogResultListener  iDialogResultListener = null;
 	private int requestCode = -1;
+	private EditText textView = null;
 		
 /**
  * Pass in resource id's or -1 if to ignore
@@ -58,6 +66,22 @@ public class LanguageDialogFragment extends DialogFragment  {
 		return frag;
 	}
 	
+	// this version will cause a custom view to be defined with input expected in the text view
+	public static LanguageDialogFragment newInstance(int view, int textView, String defaultText, int title, String message,int  positiveButtonMsg, int negativeButtonMsg, int neutralButtonMsg ) {
+		LanguageDialogFragment frag = new LanguageDialogFragment();
+		Bundle args = new Bundle();
+		args.putInt(DIALOG_VIEW_ID, view);
+		args.putInt(DIALOG_TEXT_VIEW_ID, textView);
+		args.putString(DEFAULT_TEXT, defaultText);
+		args.putInt(TITLE, title);
+		args.putString(MESSAGE_STRING, message);
+		args.putInt(POSITIVE_BUTTON_MSG, positiveButtonMsg);
+		args.putInt(NEGATIVE_BUTTON_MSG, negativeButtonMsg);
+		args.putInt(NEUTRAL_BUTTON_MSG, neutralButtonMsg);
+		frag.setArguments(args);
+		return frag;
+	}
+	
 	 
 
 	public void setOnDialogResultListener(IDialogResultListener listener, int requestCode ) {
@@ -68,12 +92,23 @@ public class LanguageDialogFragment extends DialogFragment  {
 
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		int viewId = getArguments().getInt(DIALOG_VIEW_ID,-1);
+		int textViewId = getArguments().getInt(DIALOG_TEXT_VIEW_ID,-1);
 		int title = getArguments().getInt(TITLE, -1);
 		int message = getArguments().getInt(MESSAGE, -1);
 		String messageString = getArguments().getString(MESSAGE_STRING);
 		int positiveMsg = getArguments().getInt(POSITIVE_BUTTON_MSG, -1);
 		int negativeMsg = getArguments().getInt(NEGATIVE_BUTTON_MSG, -1);
 		int neutralMsg = getArguments().getInt(NEUTRAL_BUTTON_MSG , -1);
+		if (viewId != -1){
+			 LayoutInflater inflater = getActivity().getLayoutInflater();
+			 View view = inflater.inflate(viewId , null);
+			 builder.setView(view);
+			 textView  = (EditText) view.findViewById(textViewId);
+			 String defaultText = getArguments().getString(DEFAULT_TEXT);
+			 if (defaultText != null)
+				 textView.setText(defaultText);
+		}
 		if (title != -1){
 			builder.setTitle(title);
 		}
@@ -123,8 +158,14 @@ public class LanguageDialogFragment extends DialogFragment  {
  
 	private void sendResult(int resultCode, int button_pressed) {
 		// first see if activity (or some other object that implemented interface
+		
+		 
 		if (  iDialogResultListener != null) {
-			iDialogResultListener.onDialogResult(requestCode, resultCode,button_pressed, null);
+			Bundle bundle = new Bundle();
+			if ( textView != null){
+				bundle.putString(LANGUAGE_DIALOG_TEXT_ENTRY, textView.getText().toString());
+			}
+			iDialogResultListener.onDialogResult(requestCode, resultCode,button_pressed, bundle);
 			iDialogResultListener = null;
 			dismiss();
 		}

@@ -1,21 +1,14 @@
 package com.fisincorporated.languagetutorial;
 
-import android.app.Activity;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.fisincorporated.languagetutorial.utility.LanguageSettings;
-
-public class LessonTextOptionsFragment extends OptionsFragment {
+public class OptionsLessonTextFragment extends OptionsFragment {
 //	private Button btnSave;
 //	private Button btnCancel;
 	private CheckBox cbxDisplayKnownPhraseAvailable;
@@ -36,7 +29,7 @@ public class LessonTextOptionsFragment extends OptionsFragment {
 
 	public static OptionsFragment getInstance() {
 		if (lessonTextOptionsFragment == null) {
-			lessonTextOptionsFragment = new LessonTextOptionsFragment();
+			lessonTextOptionsFragment = new OptionsLessonTextFragment();
 		}
 		return lessonTextOptionsFragment;
 	}
@@ -71,9 +64,10 @@ public class LessonTextOptionsFragment extends OptionsFragment {
 			public void onClick(View arg0) {
 				if (ignoreTextChanges)
 					return;
-				beforeLearningPhrase = rbtnBeforeLearningPhrase.isSelected();
-				afterLearningPhrase = !rbtnBeforeLearningPhrase.isSelected();
+				beforeLearningPhrase = rbtnBeforeLearningPhrase.isChecked();
+				afterLearningPhrase = !rbtnBeforeLearningPhrase.isChecked();
 				notifyOptionsChanged();
+				notifytBeforeAfterOptionChanged( 1);
 			}
 		});
 		rbtnAfterLearningPhrase = (RadioButton) view
@@ -83,9 +77,10 @@ public class LessonTextOptionsFragment extends OptionsFragment {
 			public void onClick(View arg0) {
 				if (ignoreTextChanges)
 					return;
-				afterLearningPhrase = rbtnAfterLearningPhrase.isSelected();
-				beforeLearningPhrase = !rbtnAfterLearningPhrase.isSelected();
+				afterLearningPhrase = rbtnAfterLearningPhrase.isChecked();
+				beforeLearningPhrase = !rbtnAfterLearningPhrase.isChecked();
 				notifyOptionsChanged();
+				notifytBeforeAfterOptionChanged(2);
 			}
 		});
 
@@ -121,31 +116,22 @@ public class LessonTextOptionsFragment extends OptionsFragment {
 			}
 		});
 
-//		btnSave = (Button) view.findViewById(R.id.btnSave);
-//		btnSave.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				storeOptionSettings();
-//				Toast.makeText(getActivity(), R.string.text_options_saved,
-//						Toast.LENGTH_SHORT).show();
-//				returnToCaller(Activity.RESULT_OK);
-//				// getActivity().finish();
-//			}
-//		});
-//		btnCancel = (Button) view.findViewById(R.id.btnCancel);
-//		btnCancel.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				notifyOptionChangesCancelled();
-//				returnToCaller(Activity.RESULT_CANCELED);
-//				getActivity().finish();
-//
-//			}
-//		});
-
-		tvSampleText = (TextView) view.findViewById(R.id.tvSampleText);
+ 		tvSampleText = (TextView) view.findViewById(R.id.tvSampleText);
 		cbxDisplayKnownPhraseAvailable.setFocusableInTouchMode(true);
 
+	}
+	
+	protected void syncBeforeAfter(int beforeAfter){
+		if (beforeAfter == 1){
+			rbtnBeforeLearningPhrase.setChecked(true);
+			rbtnAfterLearningPhrase.setChecked(false);
+		}
+		else {
+			rbtnBeforeLearningPhrase.setChecked(false);
+			rbtnAfterLearningPhrase.setChecked(true);
+		}
+		beforeLearningPhrase = rbtnBeforeLearningPhrase.isChecked();
+		afterLearningPhrase = !rbtnBeforeLearningPhrase.isChecked();
 	}
 
 	protected void checkForUpdates() {

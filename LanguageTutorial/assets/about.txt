@@ -1,10 +1,17 @@
 
 <p>LanguageLesson provides a framework for anyone to create and conduct language lessons.</p>
 
-<p> The steps to create your own language tutorial are at www.fisincorporated.com/languagelesson</p>
+<p> The steps to create your own language set of language lessons are at http://fisincorporated.com/language-lesson/</p>
 
-<p>To load a small example set of lessons for Turkish press the button below. With this example you can explore the 
-language lesson presentation options. (And my apologies to Turkey for my poor Turkish pronunciation!)</p>
+<p>To load a small example set of lessons for Turkish: 
+<br />Go back to the main page 
+<br />Press 'Language Maintenace' button 
+<br />Press menu, or if displayed 'Load Language File'
+<br />Select 'From the web' 
+<br />Press OK (to use default download), then OK again
+<br />
+<br />
+With this example you can explore the language lesson presentation options. (And my apologies to Turkey for my poor Turkish pronunciation!)</p>
 
 <p>The current version incorporates text and audio. Future enhancements will allow video
  (say to organize a series of YouTube videos) to be added to the mix. 

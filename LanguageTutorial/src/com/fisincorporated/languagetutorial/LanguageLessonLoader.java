@@ -1,16 +1,10 @@
 package com.fisincorporated.languagetutorial;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Context;
 import android.content.res.Resources;
-import android.os.AsyncTask;
-import android.util.Log;
 
 import com.fisincorporated.languagetutorial.db.ClassName;
 import com.fisincorporated.languagetutorial.db.ClassNameDao;
@@ -30,14 +24,13 @@ import com.fisincorporated.languagetutorial.db.Teacher;
 import com.fisincorporated.languagetutorial.db.TeacherDao;
 import com.fisincorporated.languagetutorial.db.TeacherLanguage;
 import com.fisincorporated.languagetutorial.db.TeacherLanguageDao;
+import com.fisincorporated.languagetutorial.interfaces.ILoadLessonCallBack;
 
 import de.greenrobot.dao.query.DeleteQuery;
 import de.greenrobot.dao.query.Query;
 
-//http://stackoverflow.com/questions/8417885/android-fragments-retaining-an-asynctask-during-screen-rotation-or-configuratio
-// this is equivalent to MyTask in SO example  by Timmmmm
-public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
-	private static final String TAG = "LanguageFileLoader";
+public class LanguageLessonLoader {
+	private static final String TAG = "LanguageLessonLoader";
 
 	private DaoSession daoSession;
 	private TeacherDao teacherDao;
@@ -81,73 +74,27 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 	private List<Lesson> lessonList;
 	private ArrayList<Lesson> deleteLessonList = new ArrayList<Lesson>();
 	private List<LanguageXref> languageXrefList;
-	private String errorMsg = null;
+
 	private Resources res;
+	 
+	ILoadLessonCallBack loadLessonCallBack;
 
-	// these values must match what is used by Excel spreadsheet macro that
-	// creates the language file
-	private static final String PIPE_DELIMITER = "\\|";
-	private static final String TEACHER = "Teacher";
-	private static final String TEACHER_LANGUAGE = "TeacherLanguage";
-	private static final String LANGUAGE_PHRASE = "LanguagePhrase";
-	private static final String CLASS = "Class";
-	private static final String LESSON = "Lesson";
-	private static final String LESSON_PHRASE = "LessonPhrase";
+	private String learningLanguageMediaDirectory = "";
 
-	private LoadFileTaskFragment loadFileTaskFragment;
-	private File languageFile;
-
-	private float languageFileSize = 0;
-	private long numberFileCharsRead = 0;
-	private int percentFileRead = 0;
-	private boolean loadError = false;
-	private boolean cancel = false;
-
-	// The fragment passed in should be non-ui fragment
-	public LanguageFileLoader(LoadFileTaskFragment fragment, File file) {
-		loadFileTaskFragment = fragment;
-		languageFile = file;
+	private String knownLanguageMediaDirectory = "";
+	
+	public LanguageLessonLoader(Context context, ILoadLessonCallBack loadLessonCallBack) {
+		res = context.getResources();
+		this.loadLessonCallBack = loadLessonCallBack;
+		setupDao() ;
 	}
-
-	@Override
-	protected void onPreExecute() {
-		if (loadFileTaskFragment == null)
-			return;
-		loadFileTaskFragment.onPreExecute();
+	
+   // call back with message (most likely error message)
+	private void passbackMessage(String message, boolean error) {
+		loadLessonCallBack.passbackMessage(message, error);
 	}
-
-	@Override
-	protected Boolean doInBackground(Void... params) {
-		// Need to wait till here to make sure fragment is attached to activity
-		// before trying to get resources
-		res = LanguageApplication.getInstance().getResources();
-		setupDao();
-		loadLanguageSpreadSheet(languageFile);
-		return loadError || cancel;
-	}
-
-	@Override
-	protected void onProgressUpdate(Integer... progress) {
-		if (loadFileTaskFragment == null)
-			return;
-		loadFileTaskFragment.updateProgress(progress[0]);
-	}
-
-	@Override
-	protected void onPostExecute(Boolean result) {
-		if (loadFileTaskFragment == null)
-			return;
-		loadFileTaskFragment.taskFinished(cancel ? GlobalValues.CANCELLED
-				: (loadError ? GlobalValues.FINISHED_WITH_ERROR
-						: GlobalValues.FINISHED_OK), errorMsg);
-	}
-
-	// call back with error message
-	// Save the error msg for passing back on onPostExecute - and via UI thread
-	private void passbackErrorMessage(String errorMsg) {
-		this.errorMsg = errorMsg;
-	}
-
+	
+	
 	private void setupDao() {
 		daoSession = LanguageApplication.getInstance().getDaoSession();
 		teacherDao = daoSession.getTeacherDao();
@@ -160,81 +107,31 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 		lessonDao = daoSession.getLessonDao();
 		lessonPhraseDao = daoSession.getLessonPhraseDao();
 	}
-
-	public void cancelTask(boolean cancel) {
-		this.cancel = cancel;
-	}
 	
-	public void loadLanguageSpreadSheet(File file) {
-		BufferedReader br = null;
-		// Read text from file
-		try {
-			languageFileSize = file.length();
-			numberFileCharsRead = 0;
-			// read unicode properly
-			// first byte in file appears to be byte order mark (BOM)
-			// http://en.wikipedia.org/wiki/Byte_order_mark
-			// so on first read drop the BOM
-			br = new BufferedReader(new InputStreamReader(
-					new FileInputStream(file), "UTF-16LE"));
-			String line;
-			int i = 0;
-			while ((line = br.readLine()) != null && (!loadError) && (!cancel)) {
-				numberFileCharsRead += line.length();
-				if (languageFileSize > 0) {
-					percentFileRead = (int) ((numberFileCharsRead / (float) languageFileSize) * 100);
-					publishProgress(percentFileRead);
-				}
-				processLine(i == 0 ? line.substring(1).trim() : line.trim());
-				++i;
-				if (cancel) {
-					break;
-				}
-			}
-		} catch (IOException e) {
-			passbackErrorMessage(String.format(
-					res.getString(R.string.error_reading_language_file),
-					file.getAbsolutePath()));
-			loadError = true;
-		} catch (Exception e) {
-			passbackErrorMessage(res.getString(R.string.unexpected_exception)
-					+ " " + e.toString());
-			loadError = true;
-		} finally {
-			if (br != null) {
-				try {
-					br.close();
-				} catch (IOException ioe) {
-					;
-				}
-			}
-		}
-	}
-
-	private void processLine(String line) {
+	public void processLine(String line) {
 		String[] tokens = parseLine(line);
-		if (0 == tokens[0].compareTo(TEACHER)) {
+		if (0 == tokens[0].compareTo(GlobalValues.TEACHER)) {
 			processTeacherLine(tokens);
 			return;
 		}
-		if (0 == tokens[0].compareTo(TEACHER_LANGUAGE)) {
+		if (0 == tokens[0].compareTo(GlobalValues.TEACHER_LANGUAGE)) {
 			processTeacherLanguageLine(tokens);
 			return;
 		}
-		if (0 == tokens[0].compareTo(LANGUAGE_PHRASE)) {
+		if (0 == tokens[0].compareTo(GlobalValues.LANGUAGE_PHRASE)) {
 			processLanguagePhraseLine(tokens);
 			return;
 		}
 
-		if (0 == tokens[0].compareTo(CLASS)) {
+		if (0 == tokens[0].compareTo(GlobalValues.CLASS)) {
 			processClassNameLine(tokens);
 			return;
 		}
-		if (0 == tokens[0].compareTo(LESSON)) {
+		if (0 == tokens[0].compareTo(GlobalValues.LESSON)) {
 			processLessonLine(tokens);
 			return;
 		}
-		if (0 == tokens[0].compareTo(LESSON_PHRASE)) {
+		if (0 == tokens[0].compareTo(GlobalValues.LESSON_PHRASE)) {
 			processLessonPhraseLine(tokens);
 			return;
 		}
@@ -244,7 +141,7 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 	private String[] parseLine(String line) {
 		// http://blog.mgm-tp.com/2012/05/regexp-java-puzzler/ to get empty
 		// columns after last non-empty column
-		String[] tokens = line.split(PIPE_DELIMITER, -1);
+		String[] tokens = line.split(GlobalValues.PIPE_DELIMITER, -1);
 		return tokens;
 	}
 
@@ -252,17 +149,16 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 		if (tokens.length >= 3) {
 			teacher = loadTeacher(tokens[1], tokens[2]);
 		} else {
-			passbackErrorMessage(String.format(
+			passbackMessage(String.format(
 					res.getString(R.string.wrong_number_teacher_fields),
-					listTokens(tokens)));
-			loadError = true;
+					listTokens(tokens)),true);
 		}
 	}
 
 	public String listTokens(String[] tokens) {
 		StringBuilder sb = new StringBuilder();
 		if (tokens == null)
-			return "No values found";
+			return res.getString(R.string.no_values_found);
 		else {
 			for (int i = 0; i < tokens.length; ++i) {
 				sb.append(i + ". " + tokens[i]);
@@ -293,6 +189,7 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 		return teacher;
 	}
 
+	// Save the media directories for later use (if needed by calling class)
 	public void processTeacherLanguageLine(String[] tokens) {
 		if (tokens.length >= 6) {
 			learningLanguageCode = loadLanguageCode(tokens[1]);
@@ -302,12 +199,13 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 			teacherLanguage = loadTeacherLanguage(teacher.getId(),
 					learningLanguageCode.getId(), knownLanguageCode.getId(),
 					tokens[2], tokens[4]);
+			learningLanguageMediaDirectory = tokens[2];
+			knownLanguageMediaDirectory = tokens[4];
 		} else {
-			passbackErrorMessage(String
+			passbackMessage(String
 					.format(
 							res.getString(R.string.too_few_teacher_language_fieldswrong_number_teacher_fields),
-							listTokens(tokens)));
-			loadError = true;
+							listTokens(tokens)),true);
 		}
 
 	}
@@ -375,46 +273,41 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 	// 0. "LanguagePhrase"
 	// 1. Phrase to be learned
 	// 2. Phrase type
-	// 3. Audio filename (optional)
-	// 4. Video filename (optional)
-	// 5. Pronunciation phrase (optional)
-	// 6. EnglishNumeral (eg, 1,2 , 3 optional)
-	// 7. CompoundPhrase (optional)
-	// 8. Known phrase (optional)
-	// 9. Phrase type (optional)
-	// 10. Audio filename (optional)
-	// 11. Video filename (optional)
-	// 12. Pronunciation phrase (optional)
-	// 13. EnglishNumeral (eg, 1,2 , 3 optional)
-	// 14. CompoundPhrase (optional)
+	// 3. Media (audio/video) filename (optional)
+	// 4. Pronunciation phrase (optional)
+	// 5. EnglishNumeral (eg, 1,2 , 3 optional)
+	// 6. Known phrase (optional)
+	// 7. Phrase type (optional)
+	// 8. Media (audio/video) filename (optional)
+	// 9. Pronunciation phrase (optional)
+	// 10. EnglishNumeral (eg, 1,2 , 3 optional)
 	private void processLanguagePhraseLine(String[] tokens) {
-		if (tokens.length >= 15) {
+		if (tokens.length >= 11) {
 			// first load the learningLanguagePhrase
 			learningLanguagePhrase = loadLanguagePhrase(teacher.getId(),
 					teacherLanguage.getLearningLanguageId(), tokens[1], tokens[2],
-					tokens[3], tokens[4], tokens[5], tokens[6], null);
+					tokens[3], tokens[4], tokens[5],  null);
 			// load the knownLanguage (you can end up with 'empty' class if
 			// knownlanguage not specified on spreadsheet
 			// and this causes all known phrases to be ignored
 			knownLanguagePhrase = loadLanguagePhrase(teacher.getId(),
-					teacherLanguage.getKnownLanguageId(), tokens[8], tokens[9],
-					tokens[10], tokens[11], tokens[12], tokens[13], null);
+					teacherLanguage.getKnownLanguageId(),tokens[6], tokens[7], tokens[8], tokens[9],
+					tokens[10], null);
 
 			// Now load the LanguageXref (even if knownLanguage not specified)
 			loadLanguageXref(teacher.getId(), teacherLanguage.getId(),
 					learningLanguagePhrase.getId(), knownLanguagePhrase.getId());
 		} else {
-			passbackErrorMessage(String.format(
+			passbackMessage(String.format(
 					res.getString(R.string.too_few_language_phrase_fields),
-					listTokens(tokens)));
-			loadError = true;
+					listTokens(tokens)),true);
 		}
 
 	}
 
 	private LanguagePhrase loadLanguagePhrase(Long teacherId, Long languageId,
-			String writtenPhrase, String phraseType, String audioFile,
-			String videoFile, String pronunciation, String englishNumeral,
+			String writtenPhrase, String phraseType, String mediaFile,
+			 String pronunciation, String englishNumeral,
 			String compoundPhrase) {
 		LanguagePhrase languagePhrase = null;
 		if (languageId == null) {
@@ -437,7 +330,7 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 		if (languagePhrase == null) {
 
 			languagePhrase = new LanguagePhrase(null, teacherId, languageId,
-					writtenPhrase, audioFile, videoFile, phraseType, pronunciation,
+					writtenPhrase, mediaFile, phraseType, pronunciation,
 					englishNumeral, null);
 			languagePhraseDao.insert(languagePhrase);
 		} else {
@@ -448,8 +341,7 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 			// deleteCompoundPhrase(languagePhrase.getCompoundPhraseId());
 			// }
 
-			languagePhrase.setAudioFile(audioFile);
-			languagePhrase.setVideoFile(videoFile);
+			languagePhrase.setMediaFile(mediaFile);
 			languagePhrase.setPhraseType(phraseType);
 			languagePhrase.setPronunciation(pronunciation);
 			languagePhrase.setEnglishNumeral(englishNumeral);
@@ -543,26 +435,23 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 			try {
 				order = Integer.parseInt(tokens[1]);
 			} catch (NumberFormatException nfe) {
-				passbackErrorMessage(String.format(
+				passbackMessage(String.format(
 						res.getString(R.string.invalid_order_number_for_class),
-						tokens[2], tokens[1]));
-				loadError = true;
+						tokens[2], tokens[1]),true);
 				return;
 			}
 			if (tokens[2].equals("")) {
-				passbackErrorMessage(String.format(
+				passbackMessage(String.format(
 						res.getString(R.string.name_of_class_must_be_specified),
-						tokens[1]));
-				loadError = true;
+						tokens[1]),true);
 				return;
 			}
 			loadClassName(teacher.getId(), order, tokens[2], tokens[3],
 					teacherLanguage.getId());
 		} else {
-			passbackErrorMessage(String
+			passbackMessage(String
 					.format(res.getString(R.string.too_few_class_fields),
-							listTokens(tokens)));
-			loadError = true;
+							listTokens(tokens)),true);
 			return;
 		}
 	}
@@ -663,37 +552,33 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 			className = getClassNameByTitle(teacher.getId(), tokens[1],
 					teacherLanguage.getId());
 			if (className == null || className.getClassTitle() == null) {
-				passbackErrorMessage(String
+				passbackMessage(String
 						.format(
 								res.getString(R.string.class_title_for_this_lesson_not_found),
-								tokens[1], tokens[3]));
-				loadError = true;
+								tokens[1], tokens[3]),true);
 				return;
 			}
 			try {
 				order = Integer.parseInt(tokens[2]);
 			} catch (NumberFormatException nfe) {
-				passbackErrorMessage(String.format(
+				passbackMessage(String.format(
 						res.getString(R.string.invalid_lesson_order_number),
-						tokens[1], tokens[3], tokens[2]));
-				loadError = true;
+						tokens[1], tokens[3], tokens[2]),true);
 				return;
 			}
 			if (tokens[3].equals("")) {
-				passbackErrorMessage(String.format(
+				passbackMessage(String.format(
 						res.getString(R.string.title_of_lesson_must_be_specified),
-						tokens[1], tokens[2]));
-				loadError = true;
+						tokens[1], tokens[2]),true);
 				return;
 			}
 
 			lesson = loadLesson(className.getId(), order, tokens[3], tokens[4],
 					tokens[5]);
 		} else {
-			passbackErrorMessage(String.format(
+			passbackMessage(String.format(
 					res.getString(R.string.too_few_lesson_fields),
-					listTokens(tokens)));
-			loadError = true;
+					listTokens(tokens)),true);
 		}
 	}
 
@@ -774,10 +659,9 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 						previousLesson, previousClass, teacher.getId() + "");
 			}
 			if (lessonList.size() == 0) {
-				passbackErrorMessage(String.format(
+				passbackMessage(String.format(
 						res.getString(R.string.class_lesson_not_defined), tokens[1],
-						tokens[2]));
-				loadError = true;
+						tokens[2]),true);
 				return;
 			}
 			// make sure lesson phrase order and speaker numbers are good numbers
@@ -789,13 +673,12 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 				} else
 					phraseInterval = -1;
 			} catch (NumberFormatException nfe) {
-				passbackErrorMessage(String
+				passbackMessage(String
 						.format(
 								res.getString(R.string.invalid_order_or_speaker_or_interval_number),
 								tokens[1], tokens[2], tokens[3], tokens[4],
 								((!tokens[6].equals("")) ? "" : " interval = "
-										+ tokens[6])));
-				loadError = true;
+										+ tokens[6])),true);
 				return;
 			}
 			// Make sure the phrase is in the LanguagePhrase table and get the
@@ -804,10 +687,9 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 			languagePhrase = getLanguagePhrase(teacher.getId(),
 					teacherLanguage.getLearningLanguageId(), tokens[5]);
 			if (languagePhrase == null) {
-				passbackErrorMessage(String.format(res
+				passbackMessage(String.format(res
 						.getString(R.string.lesson_phrase_missing_in_language_table),
-						tokens[5], tokens[1], tokens[2], tokens[3], tokens[4]));
-				loadError = true;
+						tokens[5], tokens[1], tokens[2], tokens[3], tokens[4]),true);
 				return;
 			}
 			// almost there, find the Language xref record
@@ -828,21 +710,19 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 			}
 			languageXrefList = languageXrefListQuery.list();
 			if (languageXrefList.size() == 0) {
-				passbackErrorMessage(String
+				passbackMessage(String
 						.format(
 								res.getString(R.string.language_phrase_xref_missing_for_lesson_phrase),
-								tokens[5], tokens[1], tokens[2], tokens[3], tokens[4]));
-				loadError = true;
+								tokens[5], tokens[1], tokens[2], tokens[3], tokens[4]),true);
 				return;
 			}
 			// made it this far
 			loadLessonPhrase(lessonList.get(0).getId(), order, speaker,
 					languageXrefList.get(0).getId(), phraseInterval);
 		} else {
-			passbackErrorMessage(String.format(
+			passbackMessage(String.format(
 					res.getString(R.string.too_few_lessonphrase_fields),
-					listTokens(tokens)));
-			loadError = true;
+					listTokens(tokens)),true);
 		}
 	}
 
@@ -877,5 +757,14 @@ public class LanguageFileLoader extends AsyncTask<Void, Integer, Boolean> {
 		return lessonPhrase;
 
 	}
+
+	public String getLearningLanguageMediaDirectory() {
+		return learningLanguageMediaDirectory;
+	}
+
+	public String getKnownLanguageMediaDirectory() {
+		return knownLanguageMediaDirectory;
+	}
+	
 
 }

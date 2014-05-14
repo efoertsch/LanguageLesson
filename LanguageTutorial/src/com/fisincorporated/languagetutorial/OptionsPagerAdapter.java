@@ -18,13 +18,13 @@ public class OptionsPagerAdapter extends FragmentPagerAdapter {
        switch (index) {
        case 0:
            // Audio Options
-      	 Log.i(TAG, "Returning LessonAudioOptionsFragment");
-           return LessonAudioOptionsFragment.getInstance();
+      	 Log.i(TAG, "Returning OptionsLessonAudioFragment");
+           return OptionsLessonAudioFragment.getInstance();
            
        case 1:
            // Text Options
-      	 Log.i(TAG, "Returning LessonTextOptionsFragment");
-           return LessonTextOptionsFragment.getInstance();
+      	 Log.i(TAG, "Returning OptionsLessonTextFragment");
+           return OptionsLessonTextFragment.getInstance();
         }
 
        return null;

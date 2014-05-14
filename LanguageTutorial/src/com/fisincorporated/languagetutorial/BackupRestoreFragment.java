@@ -9,6 +9,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
@@ -30,12 +31,13 @@ public class BackupRestoreFragment extends MasterFragment  {
 	private TextView backupLoc  ;
 	private static final int BACKUP = 0;
 	private static final int RESTORE = 1;
+	private Resources res;
 
   	
    @Override
    public void onCreate(Bundle savedInstanceState) {
    	super.onCreate(savedInstanceState);
-   	createExternalBackupDir();
+   	res = getResources();
    }
    
    @Override
@@ -108,7 +110,7 @@ public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 	}
 }
  		
- 		private void createExternalBackupDir(){
+ 		private boolean createExternalBackupDir(){
  		//creating a new folder for the database to be backed up to
        File direct = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS); 
        externalDir = direct.toString();
@@ -116,12 +118,14 @@ public void onActivityResult(int requestCode, int resultCode, Intent intent) {
            {
                if( direct.isDirectory() || direct.mkdirs() ) 
                  {
-                  //directory is created;
+                  return true;
                  }
                else  {
                	Toast.makeText(getActivity(), "Error creating directory on SD card: " + direct.toString(),Toast.LENGTH_LONG).show();
+               	return false;
                }
            }
+       return true;
     }
 
 //exporting database 
@@ -129,6 +133,7 @@ public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 	private void exportDB() {
    	FileChannel src = null;
    	FileChannel dst = null;
+   	if (!createExternalBackupDir()) return;
        try {
            File sd = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
            File data = Environment.getDataDirectory();

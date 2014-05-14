@@ -18,8 +18,7 @@ public class LanguagePhrase {
     private long languageId;
     /** Not-null value. */
     private String writtenPhrase;
-    private String audioFile;
-    private String videoFile;
+    private String mediaFile;
     /** Not-null value. */
     private String phraseType;
     private String pronunciation;
@@ -50,13 +49,12 @@ public class LanguagePhrase {
         this.id = id;
     }
 
-    public LanguagePhrase(Long id, long teacherId, long languageId, String writtenPhrase, String audioFile, String videoFile, String phraseType, String pronunciation, String englishNumeral, Long compoundPhraseId) {
+    public LanguagePhrase(Long id, long teacherId, long languageId, String writtenPhrase, String mediaFile, String phraseType, String pronunciation, String englishNumeral, Long compoundPhraseId) {
         this.id = id;
         this.teacherId = teacherId;
         this.languageId = languageId;
         this.writtenPhrase = writtenPhrase;
-        this.audioFile = audioFile;
-        this.videoFile = videoFile;
+        this.mediaFile = mediaFile;
         this.phraseType = phraseType;
         this.pronunciation = pronunciation;
         this.englishNumeral = englishNumeral;
@@ -103,20 +101,12 @@ public class LanguagePhrase {
         this.writtenPhrase = writtenPhrase;
     }
 
-    public String getAudioFile() {
-        return audioFile;
+    public String getMediaFile() {
+        return mediaFile;
     }
 
-    public void setAudioFile(String audioFile) {
-        this.audioFile = audioFile;
-    }
-
-    public String getVideoFile() {
-        return videoFile;
-    }
-
-    public void setVideoFile(String videoFile) {
-        this.videoFile = videoFile;
+    public void setMediaFile(String mediaFile) {
+        this.mediaFile = mediaFile;
     }
 
     /** Not-null value. */

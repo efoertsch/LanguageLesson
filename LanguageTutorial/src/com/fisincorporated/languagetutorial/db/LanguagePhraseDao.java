@@ -32,12 +32,11 @@ public class LanguagePhraseDao extends AbstractDao<LanguagePhrase, Long> {
         public final static Property TeacherId = new Property(1, long.class, "teacherId", false, "TEACHER_ID");
         public final static Property LanguageId = new Property(2, long.class, "languageId", false, "LANGUAGE_ID");
         public final static Property WrittenPhrase = new Property(3, String.class, "writtenPhrase", false, "WRITTEN_PHRASE");
-        public final static Property AudioFile = new Property(4, String.class, "audioFile", false, "AUDIO_FILE");
-        public final static Property VideoFile = new Property(5, String.class, "videoFile", false, "VIDEO_FILE");
-        public final static Property PhraseType = new Property(6, String.class, "phraseType", false, "PHRASE_TYPE");
-        public final static Property Pronunciation = new Property(7, String.class, "pronunciation", false, "PRONUNCIATION");
-        public final static Property EnglishNumeral = new Property(8, String.class, "englishNumeral", false, "ENGLISH_NUMERAL");
-        public final static Property CompoundPhraseId = new Property(9, Long.class, "compoundPhraseId", false, "COMPOUND_PHRASE_ID");
+        public final static Property MediaFile = new Property(4, String.class, "mediaFile", false, "MEDIA_FILE");
+        public final static Property PhraseType = new Property(5, String.class, "phraseType", false, "PHRASE_TYPE");
+        public final static Property Pronunciation = new Property(6, String.class, "pronunciation", false, "PRONUNCIATION");
+        public final static Property EnglishNumeral = new Property(7, String.class, "englishNumeral", false, "ENGLISH_NUMERAL");
+        public final static Property CompoundPhraseId = new Property(8, Long.class, "compoundPhraseId", false, "COMPOUND_PHRASE_ID");
     };
 
     private DaoSession daoSession;
@@ -61,12 +60,11 @@ public class LanguagePhraseDao extends AbstractDao<LanguagePhrase, Long> {
                 "'TEACHER_ID' INTEGER NOT NULL ," + // 1: teacherId
                 "'LANGUAGE_ID' INTEGER NOT NULL ," + // 2: languageId
                 "'WRITTEN_PHRASE' TEXT NOT NULL ," + // 3: writtenPhrase
-                "'AUDIO_FILE' TEXT," + // 4: audioFile
-                "'VIDEO_FILE' TEXT," + // 5: videoFile
-                "'PHRASE_TYPE' TEXT NOT NULL ," + // 6: phraseType
-                "'PRONUNCIATION' TEXT," + // 7: pronunciation
-                "'ENGLISH_NUMERAL' TEXT," + // 8: englishNumeral
-                "'COMPOUND_PHRASE_ID' INTEGER);"); // 9: compoundPhraseId
+                "'MEDIA_FILE' TEXT," + // 4: mediaFile
+                "'PHRASE_TYPE' TEXT NOT NULL ," + // 5: phraseType
+                "'PRONUNCIATION' TEXT," + // 6: pronunciation
+                "'ENGLISH_NUMERAL' TEXT," + // 7: englishNumeral
+                "'COMPOUND_PHRASE_ID' INTEGER);"); // 8: compoundPhraseId
         // Add Indexes
         db.execSQL("CREATE INDEX " + constraint + "IDX_LANGUAGE_PHRASE_LANGUAGE_ID ON LANGUAGE_PHRASE" +
                 " (LANGUAGE_ID);");
@@ -93,30 +91,25 @@ public class LanguagePhraseDao extends AbstractDao<LanguagePhrase, Long> {
         stmt.bindLong(3, entity.getLanguageId());
         stmt.bindString(4, entity.getWrittenPhrase());
  
-        String audioFile = entity.getAudioFile();
-        if (audioFile != null) {
-            stmt.bindString(5, audioFile);
+        String mediaFile = entity.getMediaFile();
+        if (mediaFile != null) {
+            stmt.bindString(5, mediaFile);
         }
- 
-        String videoFile = entity.getVideoFile();
-        if (videoFile != null) {
-            stmt.bindString(6, videoFile);
-        }
-        stmt.bindString(7, entity.getPhraseType());
+        stmt.bindString(6, entity.getPhraseType());
  
         String pronunciation = entity.getPronunciation();
         if (pronunciation != null) {
-            stmt.bindString(8, pronunciation);
+            stmt.bindString(7, pronunciation);
         }
  
         String englishNumeral = entity.getEnglishNumeral();
         if (englishNumeral != null) {
-            stmt.bindString(9, englishNumeral);
+            stmt.bindString(8, englishNumeral);
         }
  
         Long compoundPhraseId = entity.getCompoundPhraseId();
         if (compoundPhraseId != null) {
-            stmt.bindLong(10, compoundPhraseId);
+            stmt.bindLong(9, compoundPhraseId);
         }
     }
 
@@ -140,12 +133,11 @@ public class LanguagePhraseDao extends AbstractDao<LanguagePhrase, Long> {
             cursor.getLong(offset + 1), // teacherId
             cursor.getLong(offset + 2), // languageId
             cursor.getString(offset + 3), // writtenPhrase
-            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // audioFile
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // videoFile
-            cursor.getString(offset + 6), // phraseType
-            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // pronunciation
-            cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // englishNumeral
-            cursor.isNull(offset + 9) ? null : cursor.getLong(offset + 9) // compoundPhraseId
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // mediaFile
+            cursor.getString(offset + 5), // phraseType
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // pronunciation
+            cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // englishNumeral
+            cursor.isNull(offset + 8) ? null : cursor.getLong(offset + 8) // compoundPhraseId
         );
         return entity;
     }
@@ -157,12 +149,11 @@ public class LanguagePhraseDao extends AbstractDao<LanguagePhrase, Long> {
         entity.setTeacherId(cursor.getLong(offset + 1));
         entity.setLanguageId(cursor.getLong(offset + 2));
         entity.setWrittenPhrase(cursor.getString(offset + 3));
-        entity.setAudioFile(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setVideoFile(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setPhraseType(cursor.getString(offset + 6));
-        entity.setPronunciation(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
-        entity.setEnglishNumeral(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
-        entity.setCompoundPhraseId(cursor.isNull(offset + 9) ? null : cursor.getLong(offset + 9));
+        entity.setMediaFile(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setPhraseType(cursor.getString(offset + 5));
+        entity.setPronunciation(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
+        entity.setEnglishNumeral(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
+        entity.setCompoundPhraseId(cursor.isNull(offset + 8) ? null : cursor.getLong(offset + 8));
      }
     
     /** @inheritdoc */

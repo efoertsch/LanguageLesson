@@ -230,7 +230,7 @@ public class LessonPhraseFragment extends ListFragment implements
 				if (!errorInMedia && playAudioWhenAvailable) {
 					repeatLearningPhrase(learningLanguageDirectory,
 							learningLanguagePhraseList.get(lessonLineIndex)
-									.getAudioFile());
+									.getMediaFile());
 				}
 			}
 		});
@@ -486,8 +486,8 @@ public class LessonPhraseFragment extends ListFragment implements
 		if (isVisible() && playMedia && !errorInMedia && playAudioWhenAvailable) {
 			// playLessonPhraseAudio(learningLanguageDirectory,learningLanguagePhrase.getAudioFile());
 			queueUpAudio(learningLanguageDirectory, learningLanguagePhraseList
-					.get(lessonLineIndex).getAudioFile(), knownLanguageDirectory,
-					knownLanguagePhraseList.get(lessonLineIndex).getAudioFile());
+					.get(lessonLineIndex).getMediaFile(), knownLanguageDirectory,
+					knownLanguagePhraseList.get(lessonLineIndex).getMediaFile());
 		}
 
 	}
@@ -564,8 +564,8 @@ public class LessonPhraseFragment extends ListFragment implements
 			// (assuming of course all other conditions are true)
 			if (isVisible() && !errorInMedia && playAudioWhenAvailable) {
 				queueUpAudio(learningLanguageDirectory, learningLanguagePhraseList
-						.get(lessonLineIndex).getAudioFile(), knownLanguageDirectory,
-						knownLanguagePhraseList.get(lessonLineIndex).getAudioFile());
+						.get(lessonLineIndex).getMediaFile(), knownLanguageDirectory,
+						knownLanguagePhraseList.get(lessonLineIndex).getMediaFile());
 			}
 		}
 	}

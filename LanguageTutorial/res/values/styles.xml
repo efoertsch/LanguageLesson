@@ -5,7 +5,7 @@
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
          "AppBaseTheme"  was  parent="android:Theme.Light"  prior to ActionBarCompat
     -->
-    <style name="AppBaseTheme" parent="@style/Theme.AppCompat.Light">
+    <style name="AppBaseTheme" parent="@style/Theme.AppCompat.Light">  
     
     
         <!--

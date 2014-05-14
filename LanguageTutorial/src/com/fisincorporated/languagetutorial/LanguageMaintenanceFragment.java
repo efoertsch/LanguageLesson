@@ -2,12 +2,14 @@ package com.fisincorporated.languagetutorial;
 
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Environment;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.fisincorporated.languagetutorial.utility.FileUtil;
 import com.fisincorporated.languagetutorial.utility.LanguageSettings;
 
 // Just display status of last load/delete op
@@ -68,19 +70,34 @@ public class LanguageMaintenanceFragment extends MasterFragment {
 	// see if last was load or delete and display accordingly
 	private void displayLastTaskDetails() {
 		if (maintenanceType != -1) {
-			tv.setText(String.format(
-				res.getString(R.string.last_change),
-				(maintenanceType == LanguageMaintenanceActivity.LOAD ? res.getString(R.string.load) : res
-						.getString(R.string.delete)), maintenanceDetails,
+			tv.setText( res.getString(R.string.last_change,
+				getMaintenanceOpString(), maintenanceDetails,
 				getMaintenanceStatusString(maintenanceStatus))) ; 
 		}
 		else {
-				tv.setText(res.getString(
-						R.string.no_language_maintence_done_yet,
-						Environment.getExternalStoragePublicDirectory(
-								Environment.DIRECTORY_DOWNLOADS).getPath()
-								+ "/" + res.getString(R.string.languagetutorial_txt)));
-		 }
+			tv.setMovementMethod(LinkMovementMethod.getInstance());
+			tv.setText(Html.fromHtml(FileUtil.readAssetsText(getActivity(), "firstload.txt")));
+//				tv.setText(res.getString(
+//						R.string.no_language_maintence_done_yet,
+//						Environment.getExternalStoragePublicDirectory(
+//								Environment.DIRECTORY_DOWNLOADS).getPath()
+//								+ "/" + res.getString(R.string.languagelesson_txt)));
+ 		 }
+			
+	}
+	
+	// maintenanceType must be properly assigned prior to calling this routinue.
+	private String getMaintenanceOpString(){
+		switch (maintenanceType){
+		case  GlobalValues.LOAD:
+			return res.getString(R.string.load_from_this_device); 
+		case GlobalValues.LOAD_FROM_WEB:
+			return res.getString(R.string.load_from_web);
+		case GlobalValues.DELETE:
+			return res.getString(R.string.delete);
+		default:
+			return res.getString(R.string.unspecified_maintenance_opcode,maintenanceType );
+		}
 	}
 
 	private String getMaintenanceStatusString(int status) {
