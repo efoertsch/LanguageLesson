@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="a_lesson_must_be_selected_first">A lesson must be selected first.</string>
     <string name="a_class_must_be_selected_first">A lesson must be selected first.</string>
     <string name="about">About</string>
@@ -10,10 +11,11 @@
     <string name="after_learning_phrase">After learning phrase</string>
     <string name="backup">Backup</string>
     <string name="backup_cancelled">Backup cancelled</string>
+    <string name="backup_database">Backup Database</string>
     <string name="backup_restore_database">Backup/Restore database</string>
     <string name="backup_restore">Backup/Restore</string>
-    <string name="backup_database">Backup Database</string>
     <string name="backup_file_will_be_placed_at">Backup file will be placed on SD card at</string>
+    <string name="backup_10_secs">&lt;-10 Secs</string>
     <string name="based_on_phrase_duration">Pause X times phrase duration</string>
     <string name="by_phrase_duration_times_this_number">By phrase duration times this number</string>
     <string name="before_learning_phrase">Before learning phrase</string>
@@ -40,16 +42,19 @@
     <string name="delete_teacher_language">Delete Teacher/Language</string>
     <string name="delete_teacher_language_class">Delete teacher/language/class</string>
     <string name="delete_teacher_language_confirmation">All classes, lessons and language phrases(if not used elsewhere) will be deleted for \nTeacher: %1$s \nLanguage to be learned: %2$s \nKnown Language: %3$s\n\n</string>
-    <string name="demo_lesson_url">www.fisincorporated.com/languagelesson/web_lesson_download.txt</string>
+    <string name="demo_lesson_url">www.fisincorporated.com/languagelesson/Turkish_demo_download.txt</string>
     <string name="display_known_phrase_when_available">Display known phrase when available</string>
     <string name="description">Description</string>
     <string name="do_you_want_to_cancel_current_operation">Do you want to cancel the current operation?</string>
     <string name="enter_lesson_web_url">Enter the URL for the language lesson file. (Overtype the demo file URL or leave as is to load demo file). </string>
+    <string name="enter_lesson_file_name">Enter the file name for the language lesson to be loaded. (Overtype the demo file name or leave as is to load demo file). </string>
     <string name="error_in_media_player">An error occurred in playing a media file. The MediaPlayer error is error code: %1$d  additional code: %2$d.</string>
+    <string name="error_player">There was an error initializing the YouTubePlayer (%1$s)</string>
     <string name="error_reading_language_file">Error reading language file %1$s. Load cancelled.</string>
     <string name="error_reading_file_at_url">Error reading text file at URL: %1$s.\nDetails:\n%2$s</string>
     <string name="error_reading_media_zip_file">Error reading media zip file at URL: %1$s.\nDetails:\n%2$s</string>
-   <string name="error_playing_audio_file">An error occurred when audio file was attempted to be played. No further attempts will be made to play audio during this lesson.</string>
+    <string name="error_playing_audio_file">An error occurred when audio file was attempted to be played. No further attempts will be made to play audio during this lesson.</string>
+    <string name="error_playing_media_file">Error playing media file %1$s. Either not found on web or device.</string>
     <string name="finished_successfully">Finished Successfully</string>
     <string name="finished_with_error">Finished with error</string>
     <string name="first_record_not_teacher_record">First record in file is not a teacher record. The record is: %1$s</string>
@@ -60,7 +65,7 @@
     <string name="invalid_number_repeatXTimes">Invalid number of repeats. It must be a number between %1$d and %2$d.</string>
     <string name="invalid_number_waitXSeconds">Invalid number for Wait this many seconds.  The values must be between %1$f and %2$f or the value must be 0 if the value of %3$s is not zero. </string>
     <string name="invalid_pause_times_duration">Invalid number for Pause X times duration. The values must be between %1$f and %2$f or the value must be 0 if the value of %3$s is not zero.</string>
-     <string name="hello_world">Hello world!</string>
+    <string name="hello_world">Hello world!</string>
     <string name="invalid_order_number_for_class">Invalid order number for class. Please check your spreadsheet and recreate file. What was read for Class: %1$s and Order:%2$s (should be a number).</string>
     <string name="invalid_lesson_order_number">Invalid order number for lesson. Please check your spreadsheet and recreate file. What was read for Class: %1$s for Lesson: %2$s was: %3$s (should be a number).</string>
     <string name="invalid_lesson_phrase_order_number">Invalid order number for a lesson phrase. Please check your spreadsheet and recreate file.</string>
@@ -76,7 +81,7 @@
     <string name="language_phrase_missing_for_lesson_phrase2">The %1$d line of the lesson is missing the language phrase. Error info - teacher: %2$s, class: %3$s, lesson: %4$s. Database may be corrupt. Try reloading the language file.</string>
     <string name="language_phrase_xref_missing_for_lesson_phrase2">The %1$d line of the lesson is missing a crossreference to the phrase. Error info - teacher: %2$s, class: %3$s, lesson: %4$s. Database may be corrupt. Try reloading the language file.</string>
     <string name="language_to_be_learned">Language to be learned</string>
-    <string name="languagelesson_txt">languagelesson.txt</string>
+    <string name="languagelesson_txt">turkish_language_demo.txt</string>
     <string name="languagetutorial_txt_not_found">The %1$s file could not be found. It should be in: %2$s.</string>
     <string name="last_change">Last change: %1$s \n%2$s \n\nStatus: %3$s.</string>
     <string name="learning_language_media_from">Learning language media from %1$s. \n</string>
@@ -112,12 +117,15 @@
     <string name="no">No</string>
     <string name="no_class_selected_use_menu_to_select">No class selected. Use the menu to select a class.</string>
     <string name="no_classes_defined_for_this_teacher">No classed defined for this teacher. Load langauge file that contains classes and lessons.</string>
+    <string name="no_known_language_media_directory_defined">No known language media directory defined. If media provided, you must place it in a defined directory, or only reference web based (e.g. Youtube or similar) media</string>
     <string name="no_languages_defined_for_this_teacher">No languages defined for this teacher. Load langauge file that contains languages defined for the teacher.</string>
     <string name="no_language_maintence_done_yet">It doesn\'t look like a language file has been loaded yet. Use the menu option to load a file. The file must be loaded to this device and named: %1$s or load from web source.</string>
+    <string name="no_learning_media_directory_defined">No learning media directory defined. If media provided, you must place it in a defined directory, or only reference web based (e.g. Youtube or similar) media</string>
     <string name="no_lesson_selected_use_menu_to_select">No lesson selected. Use the menu to select a lesson.</string>
     <string name="no_teachers_defined">No teachers defined. Load language file that contains teacher(s).</string>
     <string name="no_lessons_defined_for_this_class">No lessons defined for this class. Load language file that contains lessons.</string>
     <string name="no_lesson_phrases_defined_for_this_lesson">No lesson phrases defined for this lesson. Load language file that contains lesson phrases.</string>
+    <string name="no_file_name_entered_loading_cancelled">No file name entered. Loading canceled.</string>
     <string name="no_url_entered_loading_cancelled">No URL entered. Loading cancelled.</string>
     <string name="no_values_found">No values found</string>
     <string name="not_yet_implemented">Not Yet Implemented</string>
@@ -127,11 +135,13 @@
     <string name="one_or_other_values_must_be_non_zero">One or the other values of \'%1$s\' or \'%2$s\' must be non-zero.</string>
     <string name="options">Options</string>
     <string name="options_have_changed_save_or_cancel">Options have changed. Click Save to save or Cancel to Ignore.</string>
-     <string name="options_saved">Options saved.</string>
+    <string name="options_saved">Options saved.</string>
     <string name="or">or</string>
+    <string name="pause">Pause</string>
     <string name="pause_between_repeats">Pause between repeats</string>
     <string name="pause_between_repeat_by_phrase_duration_times_x">Pause between repeats by phrase duration times this amount</string>
     <string name="pause_phrase_duration_times_x">Pause audio phrase duration times this amount</string>
+    <string name="play">Play</string>
     <string name="play_audio">Play audio</string>
     <string name="play_audio_when_available">Play audio when available</string>
     <string name="play_known_phrase_when_available">Play known phrase when available</string>
@@ -189,6 +199,7 @@
     <string name="too_few_language_phrase_fields">Too few language phrase fields. Please check/correct the LanguagePhrase tab on the spreadsheet and recreate file. These is what was read: %1$s.</string>
     <string name="unable_to_create_media_directory">Unable to create media directory: %1$s. Please check if sd card write protected. </string>
     <string name="undefined_maintenance_status_value">Undefined maintenance status value. It is %1$d.</string>
+    <string name="system_not_allowing_this_audio">Unfortunately the system is not allowing audio to be played at this time. Are you playing music or using the phone for a phone call?</string>
     <string name="unexpected_exception">Unexpected Exception on loading language file.</string>
     <string name="unspecified_maintenance_opcode">Unspecified maintenance opcode : %1$d</string>
     <string name="wrong_number_lesson_phrase_fields">Wrong number of lesson phrase fields. Please check your spreadsheet and recreate file.</string>

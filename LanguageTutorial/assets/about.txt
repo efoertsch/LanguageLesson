@@ -1,7 +1,9 @@
 
+<p><b>Teach a Language! Learn a Language!</b></p>
+
 <p>LanguageLesson provides a framework for anyone to create and conduct language lessons.</p>
 
-<p> The steps to create your own language set of language lessons are at http://fisincorporated.com/language-lesson/</p>
+<p> The steps to create your own set of language lessons are at http://fisincorporated.com/language-lesson/</p>
 
 <p>To load a small example set of lessons for Turkish: 
 <br />Go back to the main page 

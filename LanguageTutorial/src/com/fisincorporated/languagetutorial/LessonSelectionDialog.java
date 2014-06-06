@@ -40,8 +40,13 @@ import com.fisincorporated.languagetutorial.utility.LanguageSettings;
 import de.greenrobot.dao.query.Query;
 import de.greenrobot.dao.query.QueryBuilder;
 
+// logic on how to handle initial unwanted onItemSelected firings 
+// http://stackoverflow.com/questions/21747917/undesired-onitemselected-calls/21751327#_=_
 public class LessonSelectionDialog extends DialogFragment {
 	// used to determine the extent of what can be selected
+	private static final String DIALOG_FUNCTION = "DialogFunction";
+	public static final String CLASS_LESSON_SELECT = "ClassLessonSelect";
+	public static final String TEACHER_LANGUAGE_DELETE = "TeacherLanguageDelete";
 	private static final String LESSON_LEVEL = "lessonLevel";
 	public static final int SELECT_TO_LESSON = 1;
 	public static final int SELECT_TO_CLASS = 2;
@@ -56,7 +61,7 @@ public class LessonSelectionDialog extends DialogFragment {
 	protected TeacherDao teacherDao;
 	private Spinner spnrTeacher;
 	private ArrayAdapter<Teacher> teacherArrayAdapter;
-	private static ArrayList<Teacher> teacherList;
+	private static ArrayList<Teacher> teacherList = new ArrayList<Teacher>();
 	private TextView lblTeacher;
 	private static Long teacherId;
 	// private static String teacherName = "";
@@ -107,50 +112,45 @@ public class LessonSelectionDialog extends DialogFragment {
 	private int lessonPosition = -1;
 
 	// spinners onItemSelected fire when spinners first initialized
-	// these counters are used so first fire event ignored
-	private int spinnerTeacherCount = 0;
-	private int spinnerTeacherLanguageCount = 0;
-	private int spinnerClassNameCount = 0;
-	private int spinnerLessonCount = 0;
+	// these flags are used so first fire event ignored
+	private boolean processTeacherSelection = false;
+	private boolean processTeacherLanguageSelection = false;
+	private boolean processClassNameSelection = false;
+	private boolean processLessonSelection = false;
 
 	// used to store values to SharedPreferences file
 	private static LanguageSettings languageSettings;
 	private static Resources res;
 
 	private IDialogResultListener iDialogResultListener = null;
+	private String dialogFunction = "";
 	private int lessonLevel = -1;
+	private int requestCode = -1;
+	private int dialogTitle = -1;
+	private int positiveButton = -1;
+	private int negativeButton = -1;
 
 	public final static String LESSON_DIALOG_RESPONSE = "com.fisincorporated.languagetutorial.lesson.dialog.response";
 
-	public void setOnDialogResultListener(IDialogResultListener listener) {
+	public void setOnDialogResultListener(IDialogResultListener listener,
+			int requestCode) {
 		this.iDialogResultListener = listener;
-
+		this.requestCode = requestCode;
 	}
 
-	// // Should I really be saving these values in a bundle and pick them up
-	// from
-	// // bundle in onCreate?
-	// public static LessonSelectionDialog newInstance(Long inTeacherId,
-	// Long inTeacherLanguageId, Long inClassId, Long inLessonId) {
-	// LessonSelectionDialog f = new LessonSelectionDialog();
-	// teacherId = inTeacherId;
-	// teacherLanguageId = inTeacherLanguageId;
-	// classId = inClassId;
-	// lessonId = inLessonId;
-	// classNameList = new ArrayList<ClassName>();
-	// lessonList = new ArrayList<Lesson>();
-	// return f;
-	// }
-	public static LessonSelectionDialog newInstance(int lessonLevel) {
+	// Select either up to a class or a lesson
+	public static LessonSelectionDialog newInstance(String dialogFunction,
+			int lessonLevel) {
 		LessonSelectionDialog f = new LessonSelectionDialog();
 		Bundle args = new Bundle();
+		args.putString(DIALOG_FUNCTION, dialogFunction);
 		args.putInt(LESSON_LEVEL, lessonLevel);
 		f.setArguments(args);
 		return f;
 	}
 
 	public LessonSelectionDialog() {
-		languageSettings = LanguageSettings.getInstance(getActivity());
+
 	}
 
 	// use by implementing class
@@ -166,7 +166,7 @@ public class LessonSelectionDialog extends DialogFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		languageSettings = LanguageSettings.getInstance(getActivity());
 		getDatabaseSetup();
 		getCurrentLessonSettings();
 		setRetainInstance(true);
@@ -175,57 +175,201 @@ public class LessonSelectionDialog extends DialogFragment {
 
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		res = getActivity().getResources();
-		getLessonLevel(savedInstanceState);
-
+		getDialogDetails(savedInstanceState);
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setTitle(res.getString(R.string.select));
+		builder.setTitle(res.getString(dialogTitle));
 		View v = getActivity().getLayoutInflater().inflate(
 				R.layout.class_selection, null);
 		builder.setView(v);
 
-		spnrTeacher = (Spinner) v.findViewById(R.id.spnrTeacher);
 		lblTeacher = (TextView) v.findViewById(R.id.lblTeacher);
+		spnrTeacher = (Spinner) v.findViewById(R.id.spnrTeacher);
+		teacherArrayAdapter = new ArrayAdapter<Teacher>(getActivity(),
+				android.R.layout.simple_spinner_item, teacherList);
+		teacherArrayAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spnrTeacher.setAdapter(teacherArrayAdapter);
+		spnrTeacher.setOnItemSelectedListener(new OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+//				if (!processTeacherSelection) {
+//					processTeacherSelection = true;
+//					return;
+//				}
+				if((Integer)spnrTeacher.getTag(R.id.spnrTeacherPos) == position){
+					return;
+				}
+				spnrTeacher.setTag((R.id.spnrTeacherPos), (Integer) position);
+				selectedTeacher = ((Teacher) parent.getItemAtPosition(position));
+				teacherId = selectedTeacher.getId();
+				teacherLanguageId = -1l;
+				classId = -1l;
+				lessonId = -1l;
+				setUpTeacherLanguageDropDown();
+				// reloadTeacherLanguageList();
+				if (teacherFromToLanguageList.size() == 0) {
+					Toast.makeText(
+							getActivity(),
+							res.getString(R.string.no_languages_defined_for_this_teacher),
+							Toast.LENGTH_LONG).show();
+					setTeacherLanguageClassAndLessonInvisible();
+				}  
+			}
 
-		spnrTeacherLanguage = (Spinner) v.findViewById(R.id.spnrTeacherLanguage);
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		});
+
 		lblTeacherLanguage = (TextView) v.findViewById(R.id.lblTeacherLanguage);
+		spnrTeacherLanguage = (Spinner) v.findViewById(R.id.spnrTeacherLanguage);
+		teacherLanguageArrayAdapter = new ArrayAdapter<TeacherFromToLanguage>(
+				getActivity(), android.R.layout.simple_spinner_item,
+				teacherFromToLanguageList);
+		teacherLanguageArrayAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spnrTeacherLanguage.setAdapter(teacherLanguageArrayAdapter);
+		spnrTeacherLanguage
+		.setOnItemSelectedListener(new OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+//				if (!processTeacherLanguageSelection) {
+//					processTeacherLanguageSelection = true;
+//					return;
+//				}
+				if((Integer)spnrTeacherLanguage.getTag(R.id.spnrTeacherLanguagePos) == position){
+					return;
+				}
+				spnrTeacherLanguage.setTag((R.id.spnrTeacherLanguagePos), (Integer) position);
+				selectedTeacherFromToLanguage = ((TeacherFromToLanguage) parent
+						.getItemAtPosition(position));
+				teacherLanguageId = selectedTeacherFromToLanguage.getId();
+				// teacherLanguageTitle = selectedTeacherFromToLanguage
+				// .getTeacherLanguageTitle();
+				classId = -1l;
+				// classTitle = "";
+				lessonId = -1l;
+				// lessonTitle = "";
+				if (!dialogFunction
+						.equals(LessonSelectionDialog.CLASS_LESSON_SELECT)) {
+					return;
+				}
+				// should only be here if selecting a class/lesson
+				setupClassDropdown();
+				if (classNameList.size() == 0) {
+					Toast.makeText(
+							getActivity(),
+							res.getString(R.string.no_classes_defined_for_this_teacher),
+							Toast.LENGTH_LONG).show();
+					setClassAndLessonInvisible();
+				} else {
+					setClassVisibleLessonInvisible();
+					// spnrClassName.performClick();
+				}
+			}
+
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		});
+		
+		
 
 		lblClass = (TextView) v.findViewById(R.id.lblClass);
 		spnrClassName = (Spinner) v.findViewById(R.id.spnrClass);
+		classNameArrayAdapter = new ArrayAdapter<ClassName>(getActivity(),
+				android.R.layout.simple_spinner_item, classNameList);
+		classNameArrayAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spnrClassName.setAdapter(classNameArrayAdapter);
+		spnrClassName.setOnItemSelectedListener(new OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+//				if (!processClassNameSelection) {
+//					processClassNameSelection = true;
+//					return;
+//				}
+				if((Integer)spnrClassName.getTag(R.id.spnrClassNamePos) == position){
+					return;
+				}
+				spnrClassName.setTag((R.id.spnrClassNamePos), (Integer) position);
+				selectedClassName = ((ClassName) parent.getItemAtPosition(position));
+				classId = selectedClassName.getId();
+				lessonId = -1l;
+				if (lessonLevel != SELECT_TO_LESSON) {
+					return;
+				}
+				setupLessonDropdown();
+				if (lessonList.size() == 0) {
+					setClassVisibleLessonInvisible();
+					Toast.makeText(getActivity(),
+							res.getString(R.string.no_lessons_defined_for_this_class),
+							Toast.LENGTH_LONG).show();
+				}
+			}
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		});
 
 		lblLesson = (TextView) v.findViewById(R.id.lblLesson);
 		spnrLesson = (Spinner) v.findViewById(R.id.spnrLesson);
+		lessonArrayAdapter = new ArrayAdapter<Lesson>(getActivity(),
+				android.R.layout.simple_spinner_item, lessonList);
+		lessonArrayAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spnrLesson.setAdapter(lessonArrayAdapter);
+		spnrLesson.setOnItemSelectedListener(new OnItemSelectedListener() {
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+//				if (!processLessonSelection) {
+//					processLessonSelection = true;
+//					return;
+//				}
+				if((Integer)spnrLesson.getTag(R.id.spnrLessonPos) == position){
+					return;
+				}
+				spnrLesson.setTag((R.id.spnrLesson), (Integer) position);
+				selectedLesson = (Lesson) parent.getItemAtPosition(position);
+				lessonId = selectedLesson.getId();
+				// lessonTitle = selectedLesson.getLessonTitle();
+			}
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		});
 
 		// The OK button saves whatever selected
-		builder.setPositiveButton(R.string.save,
+		builder.setPositiveButton(positiveButton,
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int id) {
-						// saveSelections();
-						saveLanguagePreferences();
-						sendResult(Activity.RESULT_OK, id);
+						sendResult(Activity.RESULT_OK, id, saveSelections());
 					}
+
 				});
 		// Negative button is Cancel so return without saving anything
-		builder.setNegativeButton(R.string.cancel,
+		builder.setNegativeButton(negativeButton,
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int id) {
-						sendResult(Activity.RESULT_CANCELED, id);
+						sendResult(Activity.RESULT_CANCELED, id, null);
 					}
 				});
 
 		setUpTeacherDropdown();
-
-		setUpTeacherLanguageDropDown();
-
-		setupClassDropdown();
-		if (lessonLevel == SELECT_TO_LESSON) {
-			setupLessonDropdown();
+		if (dialogFunction.equals(LessonSelectionDialog.CLASS_LESSON_SELECT)) {
+			// already being done in setUpTeacherLanguageDropDown so don't repeat
+			// here
+			// setupClassDropdown();
+			// if (lessonLevel == SELECT_TO_LESSON) {
+			// setupLessonDropdown();
+			// }
+		} else {
+			classId = -1l;
+			lessonId = -1l;
 		}
-		v.invalidate();
+		//v.invalidate();
 		return builder.create();
-
 	}
+	
+	 
 
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -234,13 +378,35 @@ public class LessonSelectionDialog extends DialogFragment {
 
 	}
 
-	public void getLessonLevel(Bundle savedInstanceState) {
-		if (savedInstanceState != null) {
-			lessonLevel = savedInstanceState.getInt(LESSON_LEVEL);
-		} else if (getArguments() != null) {
-			lessonLevel = getArguments().getInt(LESSON_LEVEL);
-		} else
+	public void getDialogDetails(Bundle savedInstanceState) {
+		Bundle bundle = null;
+		if (getArguments() != null)
+			bundle = getArguments();
+		else if (savedInstanceState != null) {
+			bundle = savedInstanceState;
+		}
+		if (bundle != null) {
+			dialogFunction = bundle
+					.getString(LessonSelectionDialog.DIALOG_FUNCTION);
+			lessonLevel = bundle.getInt(LESSON_LEVEL);
+
+		} else {
+			dialogFunction = "";
 			lessonLevel = SELECT_TO_LESSON;
+		}
+		if (dialogFunction.equals(LessonSelectionDialog.TEACHER_LANGUAGE_DELETE)) {
+			dialogTitle = R.string.select_to_delete;
+			positiveButton = R.string.delete;
+			negativeButton = R.string.cancel;
+		} else if (dialogFunction
+				.equals(LessonSelectionDialog.CLASS_LESSON_SELECT)) {
+			dialogTitle = R.string.select;
+			positiveButton = R.string.save;
+			negativeButton = R.string.cancel;
+		} else {
+			dialogTitle = -1;
+		}
+
 	}
 
 	private void getCurrentLessonSettings() {
@@ -255,17 +421,6 @@ public class LessonSelectionDialog extends DialogFragment {
 	private void setUpTeacherDropdown() {
 		// Start of teacher dropdown stuff
 		fillTeacherList();
-		teacherArrayAdapter = new ArrayAdapter<Teacher>(getActivity(),
-				android.R.layout.simple_spinner_item, teacherList);
-		teacherArrayAdapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spnrTeacher.setAdapter(teacherArrayAdapter);
-
-		// if only one teacher use it
-		if (teacherList.size() == 1) {
-			selectedTeacher = teacherList.get(0);
-			teacherId = selectedTeacher.getId();
-		}
 		// if no teachers - big trouble
 		if (teacherList.size() == 0) {
 			Toast.makeText(getActivity(),
@@ -273,256 +428,126 @@ public class LessonSelectionDialog extends DialogFragment {
 					.show();
 			setTeachersInvisible();
 			setClassAndLessonInvisible();
+			return;
 		}
-		// if valid teacherId then set spinner
+		// see if teacher was saved at some point
 		if (teacherId != -1) {
-			// teacherPosition = getTeacherPosition(teacherList, teacherId);
 			teacherPosition = getPosition(teacherList, teacherId);
-			selectedTeacher = teacherList.get(teacherPosition);
-			// teacherName = selectedTeacher.getTeacherName();
-			spnrTeacher.setSelection(teacherPosition);
-			// spnrTeacher.setSelected(true);
-			fillTeacherFromToLanguageList();
 		}
-
-		spnrTeacher.setOnItemSelectedListener(new OnItemSelectedListener() {
-			public void onItemSelected(AdapterView<?> parent, View view,
-					int position, long id) {
-				++spinnerTeacherCount;
-				if (spinnerTeacherCount <= 1)
-					return;
-				selectedTeacher = ((Teacher) parent.getItemAtPosition(position));
-				teacherId = selectedTeacher.getId();
-				// teacherName = selectedTeacher.getTeacherName();
-				teacherLanguageId = -1l;
-				// teacherLanguageTitle = "";
-				classId = -1l;
-				// classTitle = "";
-				lessonId = -1l;
-				// lessonTitle = "";
-				reloadTeacherLanguageList();
-				if (teacherFromToLanguageList.size() == 0) {
-					Toast.makeText(
-							getActivity(),
-							res.getString(R.string.no_languages_defined_for_this_teacher),
-							Toast.LENGTH_LONG).show();
-					setTeacherLanguageClassAndLessonInvisible();
-				} else {
-					setTeacherLanguageVisibleClassAndLessonInvisible();
-				}
-
-			}
-
-			public void onNothingSelected(AdapterView<?> parent) {
-			}
-		});
+		// is teacher still in list? If not set to first teacher in list
+		if (teacherPosition == -1) {
+			teacherPosition = 0;
+			teacherLanguageId = -1l;
+			classId = -1l;
+			lessonId = -1l;
+		}
+		// teacher valid or if invalid now pointing to first teacher in list
+		selectedTeacher = teacherList.get(teacherPosition);
+		spnrTeacher.setSelection(teacherPosition);
+		spnrTeacher.setTag(R.id.spnrTeacherPos, (Integer) teacherPosition);
+		teacherId = selectedTeacher.getId();
+		setUpTeacherLanguageDropDown();
 
 	}
 
 	private void setUpTeacherLanguageDropDown() {
 		// Start of language list dropdown stuff
 		// if valid teacher then get the languages they teach
+		teacherLanguagePosition = -1;
 		if (teacherId != -1) {
-			fillTeacherFromToLanguageList();
-		}
-		teacherLanguageArrayAdapter = new ArrayAdapter<TeacherFromToLanguage>(
-				getActivity(), android.R.layout.simple_spinner_item,
-				teacherFromToLanguageList);
-		teacherLanguageArrayAdapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spnrTeacherLanguage.setAdapter(teacherLanguageArrayAdapter);
-
-		// if only one teacher/language or teacher/language not specified pick the
-		// first(or only) one
-		// in the list
-		if (teacherFromToLanguageList.size() == 1
-				|| (teacherLanguageId == -1 && teacherFromToLanguageList.size() > 0)) {
-			spnrTeacherLanguage.setSelection(0);
-			selectedTeacherFromToLanguage = teacherFromToLanguageList.get(0);
-			teacherLanguageId = selectedTeacherFromToLanguage.getId();
-		}
-		if (teacherLanguageId != -1) {
-			// teacherLanguagePosition = getTeacherFromToLanguagePosition(
-			// teacherFromToLanguageList, teacherLanguageId);
-			teacherLanguagePosition = getPosition(teacherFromToLanguageList,
-					teacherLanguageId);
-			if (teacherLanguagePosition > -1) {
-				spnrTeacherLanguage.setSelection(teacherLanguagePosition);
-				selectedTeacherFromToLanguage = teacherFromToLanguageList
-						.get(teacherLanguagePosition);
-				// teacherLanguageTitle =
-				// selectedTeacherFromToLanguage.getTeacherLanguageTitle();
-				// spnrTeacherLanguage.setSelected(true);
-				setTeacherLanguageVisibleClassAndLessonInvisible();
-				// spnrClassName.setBackgroundColor(Color.GREEN);
-			} else {
+			reloadTeacherLanguageList();
+			if (teacherFromToLanguageList.size() == 0) {
+				teacherLanguageId = -1l;
 				Toast.makeText(getActivity(),
 						res.getString(R.string.teacher_language_no_longer_defined),
 						Toast.LENGTH_LONG).show();
 				setTeacherLanguageClassAndLessonInvisible();
+				return;
 			}
 		}
-		spnrTeacherLanguage
-				.setOnItemSelectedListener(new OnItemSelectedListener() {
-					public void onItemSelected(AdapterView<?> parent, View view,
-							int position, long id) {
-						++spinnerTeacherLanguageCount;
-						if (spinnerTeacherLanguageCount <= 1)
-							return;
-						selectedTeacherFromToLanguage = ((TeacherFromToLanguage) parent
-								.getItemAtPosition(position));
-						teacherLanguageId = selectedTeacherFromToLanguage.getId();
-						// teacherLanguageTitle = selectedTeacherFromToLanguage
-						// .getTeacherLanguageTitle();
-						classId = -1l;
-						// classTitle = "";
-						lessonId = -1l;
-						// lessonTitle = "";
-						reloadClassNameList();
-						if (classNameList.size() == 0) {
-							Toast.makeText(
-									getActivity(),
-									res.getString(R.string.no_classes_defined_for_this_teacher),
-									Toast.LENGTH_LONG).show();
-							setClassAndLessonInvisible();
-						} else {
-							setClassVisibleLessonInvisible();
-						}
-					}
-
-					public void onNothingSelected(AdapterView<?> parent) {
-					}
-				});
+		// here if at least one teacher/language record loaded
+		// so find out position where teacherLanguageId is in the list
+		if (teacherLanguageId != -1) {
+			teacherLanguagePosition = getPosition(teacherFromToLanguageList,
+					teacherLanguageId);
+		}
+		// the teacherLanguageId may no longer be valid and if so set dropdown to
+		// first in list
+		if (teacherLanguagePosition == -1) {
+			teacherLanguagePosition = 0;
+			classId = -1l;
+			lessonId = -1l;
+		}
+		setTeacherLanguageVisibleClassAndLessonInvisible();
+		spnrTeacherLanguage.setSelection(teacherLanguagePosition);
+		spnrTeacherLanguage.setTag(R.id.spnrTeacherLanguagePos, (Integer)teacherLanguagePosition);
+		selectedTeacherFromToLanguage = teacherFromToLanguageList
+				.get(teacherLanguagePosition);
+		teacherLanguageId = selectedTeacherFromToLanguage.getId();
+		if (dialogFunction.equals(LessonSelectionDialog.CLASS_LESSON_SELECT)) {
+			setupClassDropdown();
+		}
 
 	}
 
 	private void setupClassDropdown() {
 		// Start of class dropdown stuff
 		// if valid teacher/language then get their classes
+		classNamePosition = -1;
 		if (teacherLanguageId != -1) {
-			fillClassList();
-		}
-		classNameArrayAdapter = new ArrayAdapter<ClassName>(getActivity(),
-				android.R.layout.simple_spinner_item, classNameList);
-		classNameArrayAdapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spnrClassName.setAdapter(classNameArrayAdapter);
-		if (classNameList.size() == 1) {
-			spnrClassName.setSelection(0);
-			selectedClassName = classNameList.get(0);
-		}
-
-		// if only one class or class not specified pick the first(or only) class
-		// in the list
-		if (classNameList.size() == 1
-				|| (classId == -1 && classNameList.size() > 0)) {
-			classId = classNameList.get(0).getId();
-		}
-		if (classId != -1) {
-			// classNamePosition = getClassNamePosition(classNameList, classId);
-			classNamePosition = getPosition(classNameList, classId);
-			if (classNamePosition > -1) {
-				selectedClassName = classNameList.get(classNamePosition);
-				// classTitle = selectedClassName.getClassTitle();
-				spnrClassName.setSelection(classNamePosition);
-				// spnrClassName.setSelected(true);
-				setClassVisibleLessonInvisible();
-				// spnrClassName.setBackgroundColor(Color.GREEN);
-			} else {
+			reloadClassNameList();
+			if (classNameList.size() == 0) {
 				Toast.makeText(getActivity(),
 						res.getString(R.string.class_no_longer_defined),
 						Toast.LENGTH_LONG).show();
 				setClassAndLessonInvisible();
 			}
 		}
-
-		spnrClassName.setOnItemSelectedListener(new OnItemSelectedListener() {
-			public void onItemSelected(AdapterView<?> parent, View view,
-					int position, long id) {
-				++spinnerClassNameCount;
-				if (spinnerClassNameCount <= 1)
-					return;
-				selectedClassName = ((ClassName) parent.getItemAtPosition(position));
-				classId = selectedClassName.getId();
-				// classTitle = selectedClassName.getClassTitle();
-				lessonId = -1l;
-				// lessonTitle = "";
-				if (lessonLevel != SELECT_TO_LESSON) {
-					return;
-				}
-				reloadLessonList();
-				if (lessonList.size() == 0) {
-					setClassVisibleLessonInvisible();
-					Toast.makeText(getActivity(),
-							res.getString(R.string.no_lessons_defined_for_this_class),
-							Toast.LENGTH_LONG).show();
-					setClassVisibleLessonInvisible();
-				} else {
-					// set the lessonId and title in case user doesn't select it
-					// because it is already displayed
-					selectedLesson = lessonList.get(0);
-					lessonId = selectedLesson.getId();
-					// lessonTitle = selectedLesson.getLessonTitle();
-					if (lessonLevel == SELECT_TO_LESSON) {
-						setLessonVisible();
-					}
-				}
-			}
-
-			public void onNothingSelected(AdapterView<?> parent) {
-			}
-		});
-
+		if (classId != -1) {
+			classNamePosition = getPosition(classNameList, classId);
+		}
+		if (classNamePosition == -1) {
+			classNamePosition = 0;
+			lessonId = -1l;
+		}
+		spnrClassName.setSelection(classNamePosition);
+		spnrClassName.setTag(R.id.spnrClassNamePos, (Integer)classNamePosition);
+		selectedClassName = classNameList.get(classNamePosition);
+		classId = selectedClassName.getId();
+		setClassVisibleLessonInvisible();
+		if (lessonLevel == SELECT_TO_LESSON) {
+			setupLessonDropdown();
+		}
+		
 	}
 
 	private void setupLessonDropdown() {
 		// start of lesson stuff
+		lessonPosition = -1;
 		if (classId != -1) {
-			// get all lessons for the class class
-			fillLessonList();
-		}
-		lessonArrayAdapter = new ArrayAdapter<Lesson>(getActivity(),
-				android.R.layout.simple_spinner_item, lessonList);
-		lessonArrayAdapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spnrLesson.setAdapter(lessonArrayAdapter);
-
-		// if only one lesson or lesson not specified pick the first (or only)
-		// lesson in the list
-		if (lessonList.size() == 1 || (lessonId == -1 && lessonList.size() > 0)) {
-			selectedLesson = lessonList.get(0);
-			lessonId = selectedLesson.getId();
-		}
-		if (lessonId != -1) {
-			// lessonPosition = getLessonPosition(lessonList, lessonId);
-			lessonPosition = getPosition(lessonList, lessonId);
-			if (lessonPosition > -1) {
-				selectedLesson = lessonList.get(lessonPosition);
-				// lessonTitle = selectedLesson.getLessonTitle();
-				spnrLesson.setSelection(lessonPosition);
-				// spnrLesson.setSelected(true);
-				setLessonVisible();
-			} else {
+			// get all lessons for the class
+			reloadLessonList();
+			if (lessonList.size() == 0) {
 				Toast.makeText(getActivity(),
 						res.getString(R.string.lesson_no_longer_defined),
 						Toast.LENGTH_LONG).show();
-				setClassVisibleLessonInvisible();
+				setLessonVisible(View.INVISIBLE);
+				classId = -1l;
+				return;
 			}
 		}
-		spnrLesson.setOnItemSelectedListener(new OnItemSelectedListener() {
-			public void onItemSelected(AdapterView<?> parent, View view,
-					int position, long id) {
-				++spinnerLessonCount;
-				if (spinnerLessonCount <= 1)
-					return;
-				selectedLesson = (Lesson) parent.getItemAtPosition(position);
-				lessonId = selectedLesson.getId();
-				// lessonTitle = selectedLesson.getLessonTitle();
-			}
-
-			public void onNothingSelected(AdapterView<?> parent) {
-			}
-		});
+		// if here at least have one lesson
+		if (lessonId != -1) {
+			lessonPosition = getPosition(lessonList, lessonId);
+		}
+		if (lessonPosition == -1) {
+			lessonPosition = 0;
+		}
+		spnrLesson.setSelection(lessonPosition);
+		spnrLesson.setTag(R.id.spnrLessonPos,(Integer)lessonPosition);
+		selectedLesson = lessonList.get(lessonPosition);
+		lessonId = selectedLesson.getId();
+		setLessonVisible(View.VISIBLE);
 
 	}
 
@@ -561,9 +586,9 @@ public class LessonSelectionDialog extends DialogFragment {
 		spnrLesson.setVisibility(View.INVISIBLE);
 	}
 
-	private void setLessonVisible() {
-		lblLesson.setVisibility(View.VISIBLE);
-		spnrLesson.setVisibility(View.VISIBLE);
+	private void setLessonVisible(int visible) {
+		lblLesson.setVisibility(visible);
+		spnrLesson.setVisibility(visible);
 	}
 
 	@Override
@@ -575,8 +600,10 @@ public class LessonSelectionDialog extends DialogFragment {
 	// following methods are duplicated in DeleteTeacherLanguageDialog.
 	// At some point move common logic to respective Dao's
 	private void fillTeacherList() {
-		qbTeacher = teacherDao.queryBuilder();
-		teacherList = (ArrayList<Teacher>) qbTeacher.list();
+		qbTeacher = teacherDao.queryBuilder().orderAsc(TeacherDao.Properties.TeacherName);
+		teacherList.clear();
+		teacherList.addAll((ArrayList<Teacher>) qbTeacher.list());
+		teacherArrayAdapter.notifyDataSetChanged();
 	}
 
 	private int getPosition(ArrayList<? extends DomainObject> list, Long id) {
@@ -588,18 +615,8 @@ public class LessonSelectionDialog extends DialogFragment {
 		return -1;
 	}
 
-	// private int getTeacherPosition(ArrayList<Teacher> list, Long id) {
-	// for (int i = 0; i < list.size(); ++i) {
-	// if (id == list.get(i).getId()) {
-	// return i;
-	// }
-	// }
-	// return -1;
-	// }
-
 	// Teacher language methods
 	private void reloadTeacherLanguageList() {
-		teacherLanguageArrayAdapter.clear();
 		fillTeacherFromToLanguageList();
 		teacherLanguageArrayAdapter.notifyDataSetChanged();
 	}
@@ -627,26 +644,17 @@ public class LessonSelectionDialog extends DialogFragment {
 				tftl.setLearningLanguageId(teacherLanguage.getLearningLanguageId());
 				tftl.setLearningLanguageName(teacherLanguage
 						.getLearningLanguageCheck().getLanguageName());
-
 				teacherFromToLanguageList.add(tftl);
 			}
 		}
+		// ArrayAdapter.addAll only from V11 on
+		// teacherLanguageArrayAdapter.clear();
+		// teacherLanguageArrayAdapter.addAll(teacherFromToLanguageList);
 	}
-
-	// private int getTeacherFromToLanguagePosition(
-	// ArrayList<TeacherFromToLanguage> list, Long id) {
-	// for (int i = 0; i < list.size(); ++i) {
-	// if (id == list.get(i).getId()) {
-	// return i;
-	// }
-	// }
-	// return -1;
-	// }
 
 	// Class Name methods
 	@SuppressLint("NewApi")
 	private void reloadClassNameList() {
-		classNameArrayAdapter.clear();
 		fillClassList();
 		classNameArrayAdapter.notifyDataSetChanged();
 	}
@@ -662,36 +670,18 @@ public class LessonSelectionDialog extends DialogFragment {
 					.orderAsc(ClassNameDao.Properties.ClassOrder).build();
 		} else {
 			classNameQuery.setParameter(0, teacherId);
+			classNameQuery.setParameter(1, teacherLanguageId);
 		}
 		classNameList.clear();
 		classNameList.addAll(classNameQuery.list());
-
+		// ArrayAdapter.addAll only from V11 on
+		// classNameArrayAdapter.clear();
+		// classNameArrayAdapter.addAll(classNameQuery.list());
 	}
-
-	// private int getClassNamePosition(ArrayList<ClassName> list, Long id) {
-	// for (int i = 0; i < list.size(); ++i) {
-	// if (id == list.get(i).getId()) {
-	// return i;
-	// }
-	// }
-	// return -1;
-	// }
 
 	@SuppressLint("NewApi")
 	private void reloadLessonList() {
-		lessonArrayAdapter.clear();
-
 		fillLessonList();
-		// no need to read to adapter as added to lessonList in fillLessonList
-		// above
-		// if (android.os.Build.VERSION.SDK_INT >=
-		// android.os.Build.VERSION_CODES.HONEYCOMB) {
-		// lessonArrayAdapter.addAll(lessonList);
-		// } else {
-		// for (int i = 0; i < lessonList.size(); ++i) {
-		// lessonArrayAdapter.add((Lesson) lessonList.get(i));
-		// }
-		// }
 		lessonArrayAdapter.notifyDataSetChanged();
 	}
 
@@ -708,21 +698,10 @@ public class LessonSelectionDialog extends DialogFragment {
 
 	}
 
-	// private int getLessonPosition(ArrayList<Lesson> list, Long id) {
-	// for (int i = 0; i < list.size(); ++i) {
-	// if (id == list.get(i).getId()) {
-	// return i;
-	// }
-	// }
-	// return -1;
-	// }
-
-	// updated selections should be saved in preferences file prior to returning
-
-	private void sendResult(int resultCode, int button_pressed) {
+	private void sendResult(int resultCode, int button_pressed, Bundle bundle) {
 		if (iDialogResultListener != null) {
-			iDialogResultListener.onDialogResult(lessonLevel, resultCode,
-					button_pressed, null);
+			iDialogResultListener.onDialogResult(requestCode, resultCode,
+					button_pressed, bundle);
 			iDialogResultListener = null;
 			dismiss();
 		}
@@ -732,6 +711,29 @@ public class LessonSelectionDialog extends DialogFragment {
 		Intent intent = new Intent();
 		getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode,
 				intent);
+	}
+
+	private Bundle saveSelections() {
+		Bundle bundle;
+		if (dialogFunction.equals(LessonSelectionDialog.TEACHER_LANGUAGE_DELETE)) {
+			TeacherFromToLanguage teacherFromToLanguage = new TeacherFromToLanguage(
+					selectedTeacherFromToLanguage.getId(),
+					selectedTeacherFromToLanguage.getKnownLanguageName() + " to "
+							+ selectedTeacherFromToLanguage.getLearningLanguageName(),
+					selectedTeacherFromToLanguage.getLearningLanguageId(),
+					selectedTeacherFromToLanguage.getLearningLanguageName(),
+					selectedTeacherFromToLanguage.getKnownLanguageId(),
+					selectedTeacherFromToLanguage.getKnownLanguageName(),
+					selectedTeacher.getId(), selectedTeacher.getTeacherName());
+			bundle = new Bundle();
+			bundle.putParcelable(GlobalValues.TEACHER_FROM_TO_LANGUAGE,
+					teacherFromToLanguage);
+		} else {
+			saveLanguagePreferences();
+			bundle = null;
+		}
+		return bundle;
+
 	}
 
 	// save results in preferences,
@@ -748,16 +750,22 @@ public class LessonSelectionDialog extends DialogFragment {
 						selectedTeacherFromToLanguage.getKnownLanguageId())
 				.setKnownLanguageName(
 						selectedTeacherFromToLanguage.getKnownLanguageName())
-				.setClassId(selectedClassName.getId())
-				.setClassTitle(selectedClassName.getClassTitle())
+				.setClassId(classId == -1 ? -1 : selectedClassName.getId())
+				.setClassTitle(
+						classId == -1 ? "" : selectedClassName.getClassTitle())
 				.setLessonId(
-						(lessonLevel == SELECT_TO_LESSON) ? selectedLesson.getId()
-								: -1)
+						lessonId == -1 ? -1
+								: (lessonLevel == SELECT_TO_LESSON) ? selectedLesson
+										.getId() : -1)
+				.setLessonType(
+						lessonId == -1 ? ""
+								: (lessonLevel == SELECT_TO_LESSON) ? selectedLesson
+										.getLessonType() : "")
 				.setLessonTitle(
-						(lessonLevel == SELECT_TO_LESSON) ? selectedLesson
-								.getLessonTitle() : "") 
-				.setLastLessonPhraseLine(-1)
-				.commit();
+						lessonId == -1 ? ""
+								: (lessonLevel == SELECT_TO_LESSON) ? selectedLesson
+										.getLessonTitle() : "")
+				.setLastLessonPhraseLine(-1).commit();
 
 	}
 
@@ -765,10 +773,10 @@ public class LessonSelectionDialog extends DialogFragment {
 	public void onDestroyView() {
 		if (getDialog() != null && getRetainInstance()) {
 			// if crash occurs try getDialog().setDismissMessage(null);
-			spinnerTeacherCount = 0;
-			spinnerTeacherLanguageCount = 0;
-			spinnerClassNameCount = 0;
-			spinnerLessonCount = 0;
+			processTeacherSelection = false;
+			processTeacherLanguageSelection = false;
+			processClassNameSelection = false;
+			processLessonSelection = false;
 			getDialog().setOnDismissListener(null);
 		}
 		super.onDestroyView();

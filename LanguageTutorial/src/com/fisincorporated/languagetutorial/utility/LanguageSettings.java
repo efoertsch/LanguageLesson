@@ -32,6 +32,7 @@ public class LanguageSettings {
 	private static final String LESSON_TITLE = "LessonTitle";
 	private static final String LESSON_DESCRIPTION = "LessonDescription";
 	private static final String LESSON_PHRASE_ID = "LessonId";
+	private static final String LESSON_TYPE="LessonType";
 
 	private static final String LEARNING_LANGUAGE_ID = "LearningLanguageId";
 	private static final String LEARNING_LANGUAGE_NAME = "LearningLanguageName";
@@ -183,7 +184,19 @@ public class LanguageSettings {
 		editor.putString(LESSON_DESCRIPTION, value);
 		return this;
 	}
+	 
+	public String getLessonType() {
+		return sPrefs.getString(LESSON_TYPE, "");
+	}
 
+	public LanguageSettings setLessonType(String value) {
+		if (value == null)
+			value = "";
+		editor.putString(LESSON_TYPE, value);
+		return this;
+	}
+	
+ 
 	public Long getLessonPhraseId() {
 		return sPrefs.getLong(LESSON_PHRASE_ID, -1);
 	}

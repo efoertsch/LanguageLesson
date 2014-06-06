@@ -21,8 +21,6 @@ public class LessonPhraseActivity extends MasterActivity {
 			lessonPhraseFragment = new LessonPhraseFragment();
 			return lessonPhraseFragment;
 		}
-
-
-
+	
 	}
 

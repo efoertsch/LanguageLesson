@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -42,6 +43,8 @@ import com.fisincorporated.languagetutorial.db.LessonPhrase;
 import com.fisincorporated.languagetutorial.db.LessonPhraseDao;
 import com.fisincorporated.languagetutorial.db.TeacherLanguage;
 import com.fisincorporated.languagetutorial.db.TeacherLanguageDao;
+import com.fisincorporated.languagetutorial.interfaces.IPauseMedia;
+import com.fisincorporated.languagetutorial.interfaces.IStartNewLesson;
 import com.fisincorporated.languagetutorial.utility.LanguagePhraseRequest;
 import com.fisincorporated.languagetutorial.utility.LanguageSettings;
 import com.fisincorporated.languagetutorial.utility.PhrasePlayRequest;
@@ -49,7 +52,7 @@ import com.fisincorporated.languagetutorial.utility.PhrasePlayRequest;
 import de.greenrobot.dao.query.Query;
 
 public class LessonPhraseFragment extends ListFragment implements
-		IAssignLessonLineText {
+		IAssignLessonLineText, IStartNewLesson, IPauseMedia {
 	private static final String TAG = "LessonPhraseFragment";
 	private DaoSession daoSession;
 	private LessonDao lessonDao;
@@ -126,15 +129,14 @@ public class LessonPhraseFragment extends ListFragment implements
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
 		setRetainInstance(true);
-		daoSession = LanguageApplication.getInstance().getDaoSession();
-		lessonDao = daoSession.getLessonDao();
-		lessonPhraseDao = daoSession.getLessonPhraseDao();
-		teacherLanguageDao = daoSession.getTeacherLanguageDao();
-		classNameDao = daoSession.getClassNameDao();
-
-		languageSettings = LanguageSettings.getInstance(getActivity());
+		// set the volume control for audio and not ringer
+		getActivity().setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		setupDatabaseAccess();
+		getAndInitLanguageSettings();
+		
 		res = getResources();
-
+		
+		// This controls background load of language phrases to be displayed
 		languagePhraseLoader = new LanguagePhraseLoader(new Handler());
 		languagePhraseLoader.setListener(new LanguagePhraseLoadListener() {
 			@Override
@@ -165,6 +167,7 @@ public class LessonPhraseFragment extends ListFragment implements
 		languagePhraseLoader.getLooper();
 		Log.i(TAG, "LanguagePhraseLoader background thread started");
 
+		// This controls background playing of any audio that goes with the text
 		languagePhrasePlayer = new LanguagePhrasePlayer(new Handler(),
 				getActivity());
 		languagePhrasePlayer.setListener(new LanguagePhrasePlayerListener() {
@@ -189,6 +192,21 @@ public class LessonPhraseFragment extends ListFragment implements
 				res.getColor(R.color.light_green),
 				res.getColor(R.color.light_blue), res.getColor(R.color.light_red) };
 
+	}
+
+	private void getAndInitLanguageSettings() {
+		languageSettings = LanguageSettings.getInstance(getActivity());
+		// always start at beginning of lesson
+		lessonLineIndex = -1;
+		languageSettings.setLastLessonPhraseLine(lessonLineIndex);
+	}
+
+	private void setupDatabaseAccess() {
+		daoSession = LanguageApplication.getInstance().getDaoSession();
+		lessonDao = daoSession.getLessonDao();
+		lessonPhraseDao = daoSession.getLessonPhraseDao();
+		teacherLanguageDao = daoSession.getTeacherLanguageDao();
+		classNameDao = daoSession.getClassNameDao();
 	}
 
 	@Override
@@ -240,6 +258,7 @@ public class LessonPhraseFragment extends ListFragment implements
 		tvHeader.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				// TODO add learning language
 				Toast.makeText(
 						getActivity(),
 						String.format(
@@ -864,6 +883,13 @@ public class LessonPhraseFragment extends ListFragment implements
 		Intent intent = new Intent(getActivity(),
 				LanguageMaintenanceActivity.class);
 		getActivity().startActivity(intent);
+	}
+
+	
+	// for IPauseMedia interface
+	@Override
+	public void pauseMedia() {
+		languagePhrasePlayer.clearQueue();
 	}
 
 }

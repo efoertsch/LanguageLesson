@@ -9,7 +9,7 @@ import android.util.Log;
 
 public class DeleteTeacherLanguageFragment extends Fragment {
 	private static IAsyncCallBacks callBack;
-	private String TAG = "DeleteTeacherLanguageTaskFragment";
+	private String TAG = "DeleteTeacherLanguageFragment";
 	private TeacherLanguageDelete teacherLanguageDelete;
 	private static DeleteTeacherLanguageFragment taskFragment = null;
 

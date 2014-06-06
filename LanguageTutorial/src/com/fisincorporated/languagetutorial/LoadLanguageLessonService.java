@@ -32,6 +32,8 @@ import com.fisincorporated.languagetutorial.utility.LanguageSettings;
 // http://www.mysamplecode.com/2011/10/android-intentservice-example-using.html
 //http://stackoverflow.com/questions/6099429/how-to-read-text-file-in-android-from-web
 
+//IntentService runs on background thread
+// The interface is to receive callbacks from LanguageLessonLoader
 public class LoadLanguageLessonService extends IntentService implements
 		ILoadLessonCallBack {
 	private static final String TAG = "LoadLanguageLessonService";
@@ -53,6 +55,10 @@ public class LoadLanguageLessonService extends IntentService implements
 	// used to store values to SharedPreferences file
 	private LanguageSettings languageSettings;
 
+	/**
+   * A constructor is required, and must call the super IntentService(String)
+   * constructor with a name for the worker thread.
+   */
 	public LoadLanguageLessonService() {
 		super(LoadLanguageLessonService.TAG);
 	}
@@ -61,6 +67,12 @@ public class LoadLanguageLessonService extends IntentService implements
 		super(name);
 	}
 
+	/**
+	   * The IntentService calls this method from the default worker thread with
+	   * the intent that started the service. When this method returns, IntentService
+	   * stops the service, as appropriate.
+	   * Handle requests sequentially (but in this case you should get only 1)
+	   */
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		res = getResources();
@@ -84,14 +96,14 @@ public class LoadLanguageLessonService extends IntentService implements
 		if ((!cancel && !loadError) && !lessonFileUrl.equalsIgnoreCase("null")) {
 			loadLanguageLessons();
 		}
-		if ((!cancel && !loadError) && !learningMediaUrl.equalsIgnoreCase("null")) {
+		if ((!cancel && !loadError) && !learningMediaUrl.equalsIgnoreCase("null") && !learningMediaUrl.trim().equals("")) {
 			maintOpDetails.append(res.getString(
 					R.string.learning_language_media_from, learningMediaUrl));
 			updateLoadDetails(maintOpDetails.toString()
 					+ res.getString(R.string.load_in_progress));
 			unizpMediaFile(learningLanguageMediaDirectory, learningMediaUrl);
 		}
-		if ((!cancel && !loadError) && !knownMediaUrl.equalsIgnoreCase("null")) {
+		if ((!cancel && !loadError) && !knownMediaUrl.equalsIgnoreCase("null") && !knownMediaUrl.trim().equals("")) {
 			maintOpDetails.append(res.getString(
 					R.string.known_language_media_from, knownMediaUrl));
 			updateLoadDetails(maintOpDetails.toString()

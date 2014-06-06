@@ -43,5 +43,9 @@ public class GlobalValues {
 	public static final String LESSON_PHRASE = "LessonPhrase";
 	// field separator in language file
 	public static final String PIPE_DELIMITER = "\\|";
+	
+	// media may either be a file on device or a URL pointing to for example, a youtube video
+	// may be video or audio media
+	public static final String YOUTUBE_IND = "youtube:";
 
 }

@@ -1,5 +1,6 @@
 package com.fisincorporated.languagetutorial;
 
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -36,9 +37,11 @@ public abstract class MasterActivity extends ActionBarActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(getLayoutResId());
 		// do whatever needed
-		actionBar = getSupportActionBar();
-		actionBar.setTitle(getResources().getString(R.string.app_name));
-		actionBar.setHomeButtonEnabled(true);
+//		actionBar = getSupportActionBar();
+//		actionBar.setTitle(getResources().getString(R.string.app_name));
+//		actionBar.setHomeButtonEnabled(true);
+//		// ff0000ff solid bluse
+//		actionBar.setBackgroundDrawable(new ColorDrawable(0xff0000ff));
 		
 		FragmentManager fm = getSupportFragmentManager();
 		Fragment fragment = fm.findFragmentById(R.id.fragmentContainer);

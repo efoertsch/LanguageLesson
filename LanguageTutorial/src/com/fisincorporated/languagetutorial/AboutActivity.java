@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import com.fisincorporated.languagetutorial.utility.FileUtil;
 
 import android.content.res.AssetManager;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
@@ -28,7 +29,7 @@ public class AboutActivity   extends ActionBarActivity {
 		tvAbout = (TextView) findViewById(R.id.about_activity_tvAbout);
 		tvAbout.setMovementMethod(LinkMovementMethod.getInstance());
 		tvAbout.setText(Html.fromHtml(FileUtil.readAssetsText(this, "about.txt")));
-		 
+		
 
 
 	}

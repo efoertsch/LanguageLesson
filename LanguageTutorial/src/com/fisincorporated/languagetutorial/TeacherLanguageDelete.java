@@ -23,6 +23,7 @@ import com.fisincorporated.languagetutorial.db.Teacher;
 import com.fisincorporated.languagetutorial.db.TeacherDao;
 import com.fisincorporated.languagetutorial.db.TeacherLanguage;
 import com.fisincorporated.languagetutorial.db.TeacherLanguageDao;
+import com.fisincorporated.languagetutorial.utility.LanguageSettings;
 
 import de.greenrobot.dao.query.DeleteQuery;
 import de.greenrobot.dao.query.Query;
@@ -32,37 +33,16 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 
 	private DaoSession daoSession;
 	private TeacherDao teacherDao;
-	//private Teacher teacher;
 	private TeacherLanguageDao teacherLanguageDao;
 	private TeacherLanguage teacherLanguage;
-	//private LanguageCodeDao languageCodeDao;
-	//private LanguageCode learningLanguageCode;
-	//private LanguageCode knownLanguageCode;
 	private LanguagePhraseDao languagePhraseDao;
-	//private LanguagePhrase learningLanguagePhrase;
-	//private LanguagePhrase knownLanguagePhrase;
 	private LanguageXrefDao languageXrefDao;
-	// private LanguageXref languageXref;
-	// private CompoundPhraseDao compoundPhraseDao;
-	// private ClassName className;
 	private ClassNameDao classNameDao;
-	//private Lesson lesson;
+
 	private LessonDao lessonDao;
-	// private LessonPhrase lessonPhrase;
 	private LessonPhraseDao lessonPhraseDao;
 
-	//private Query<Teacher> teacherQuery = null;
-	//private Query<LanguageCode> languageQuery = null;
-	//private Query<TeacherLanguage> teacherLanguageQuery = null;
-	//private Query<LanguagePhrase> languagePhraseQuery = null;
-	//private Query<LanguageXref> languageXrefQuery = null;
-	//private Query<ClassName> classNameQuery = null;
-	//private Query<ClassName> classNameByTitleQuery = null;
-	//private Query<Lesson> lessonQuery = null;
 	private Query<Lesson> lessonListQuery = null;
-	//private Query<LanguageXref> languageXrefListQuery = null;
-	//private Query<LessonPhrase> lessonPhraseQuery = null;
-	//private DeleteQuery<CompoundPhrase> compoundPhraseDeleteQuery = null;
 	private DeleteQuery<LessonPhrase> lessonPhraseDeleteQuery = null;
 	private DeleteQuery<Lesson> lessonDeleteQuery = null;
 	private DeleteQuery<ClassName> classNameDeleteQuery = null;
@@ -116,7 +96,23 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 	protected void onPreExecute() {
 		if (deleteTeacherLanguageFragment == null)
 			return;
+		checkResetLanguageSettings();
 		deleteTeacherLanguageFragment.onPreExecute();
+	}
+
+	private void checkResetLanguageSettings() {
+		LanguageSettings languageSettings = LanguageSettings.getInstance(deleteTeacherLanguageFragment.getActivity());
+		if (teacherFromToLanguage.getId() == languageSettings.getTeacherLanguageId()){
+			languageSettings.setTeacherId(-1l)
+			.setTeacherLanguageId(-1l) 
+			.setTeacherName("") 
+			.setClassId(-1l) 
+			.setClassTitle("") 
+			.setLessonId(-1l) 
+			.setLessonTitle("") 
+			.setLastLessonPhraseLine(-1) 
+			.commit();
+		}
 	}
 
 	@Override
@@ -250,7 +246,6 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 
 	private void getTeacherInfo(long teacherId, long learningLanguageId, long knownLanguageId) {
 		Cursor cursor = null;
-		int count = 0;
 		// See if teacher has reversed teaching language (English ->Turkish and
 		// Turkish->English)
 		String sql = "select count(*) from " + TeacherLanguageDao.TABLENAME
@@ -383,6 +378,8 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 	private boolean deleteMediaFiles(String directory) {
 		// if directory exists, delete all files in directory then delete the
 		// directory
+		// else if no directory defined then perhaps all media via web so return true also
+		if (directory == null || directory.equals("")) return true;
 		File dir = new File(
 				Environment
 						.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
