@@ -496,7 +496,7 @@ public class LanguageMaintenanceService extends IntentService implements
 	private File createMediaDirectory(String directory) {
 		File sd = getDownloadDirectory();
 		if (!sd.exists()) {
-			if (sd.isDirectory() || sd.mkdirs()) {
+			if ( sd.mkdirs() || sd.isDirectory()) {
 				// directory is created;
 			} else {
 				storeErrorMessage(res.getString(
