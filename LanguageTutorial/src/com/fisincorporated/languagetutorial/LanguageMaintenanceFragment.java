@@ -77,11 +77,6 @@ public class LanguageMaintenanceFragment extends MasterFragment {
 		else {
 			tv.setMovementMethod(LinkMovementMethod.getInstance());
 			tv.setText(Html.fromHtml(FileUtil.readAssetsText(getActivity(), "firstload.txt")));
-//				tv.setText(res.getString(
-//						R.string.no_language_maintence_done_yet,
-//						Environment.getExternalStoragePublicDirectory(
-//								Environment.DIRECTORY_DOWNLOADS).getPath()
-//								+ "/" + res.getString(R.string.languagelesson_txt)));
  		 }
 			
 	}

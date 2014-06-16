@@ -32,24 +32,21 @@ import com.fisincorporated.languagetutorial.utility.LanguageSettings;
 
 // Used logic from http://www.androiddesignpatterns.com/2013/04/retaining-objects-across-config-changes.html and modified as needed
 // Control load/delete for languages plus display status of last language op
-// Now that this is done this whole process (Activity/Headless fragments/Asynctasks) logic should probably be rewritten
-// For LoadLanguageLessonService
 // http://stackoverflow.com/questions/8802157/how-to-use-localbroadcastmanager
 
 public class LanguageMaintenanceActivity extends MasterActivity implements
-		IAsyncCallBacks, IDialogResultListener {
-
+		IDialogResultListener {
+	public static final String LOAD_FROM_BUNDLE = "com.fisincorporated.languagetutorial.LoadFromBundle";
 	// Tag so we can find the task fragment again should there be an orientation
 	// change
-	static final String LOAD_FILE_TASK_FRAGMENT = "LoadFileTaskFragment";
-	private static final String DELETE_TEACHER_TASK_FRAGMENT = "DeleteTeacherTaskFragment";
+	// static final String LOAD_FILE_TASK_FRAGMENT = "LoadFileTaskFragment";
+	// private static final String DELETE_TEACHER_TASK_FRAGMENT =
+	// "DeleteTeacherTaskFragment";
 
 	private LanguageDialogFragment dialog;
 	private boolean loadError = false;
 
 	private LanguageMaintenanceFragment languageMaintenanceFragment = null;
-	private LoadFileTaskFragment loadFileTaskFragment;
-	private DeleteTeacherLanguageFragment deleteTeacherLanguageFragment = null;
 	private static Menu myMenu;
 	private ProgressDialog progressDialog = null;
 
@@ -69,6 +66,7 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 	private static final int SELECT_TEACHER_LANGUAGE_TO_DELETE = 17;
 	private static final int CANCEL_OP = 18;
 	private static final int CONFIRM_WEB_LOAD = 19;
+	private static final int CONFIRM_WEB_LOAD_FROM_BUNDLE = 20;
 
 	// //Maintenance type being performed used with MAINTENANCE_TYPE below
 	// public static final int LOAD = 1;
@@ -91,14 +89,18 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 
 	private Resources res;
 	private long teacherId;
-	
+
 	private String loadFileUrl = "";
 	private String loadFileDevice = "";
+	private String bundleFileUrl = null;
+	private String statusMessage;
+	private int percentComplete;
 
 	// added for tablet
 
 	protected int getLayoutResId() {
-		return R.layout.activity_masterdetail;
+		//return R.layout.activity_masterdetail;
+		return R.layout.activity_fragment;
 	}
 
 	@Override
@@ -111,125 +113,25 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		res = getResources();
-		actionBar = getSupportActionBar();
-		actionBar.setTitle(res.getString(R.string.language_maintenance));
+		// actionBar = getSupportActionBar();
+		// actionBar.setTitle(res.getString(R.string.language_maintenance));
 		languageSettings = LanguageSettings.getInstance(this);
-
+		checkForLoadRequest();
 		FragmentManager fm = getSupportFragmentManager();
 		List<Fragment> list = fm.getFragments();
 		if (list != null) {
 			for (int i = 0; i < list.size(); ++i) {
-				if (list.get(i) instanceof LanguageMaintenanceFragment){
+				if (list.get(i) instanceof LanguageMaintenanceFragment) {
 					languageMaintenanceFragment = (LanguageMaintenanceFragment) list
 							.get(i);
-				break;
+					break;
 				}
 			}
 		}
 	}
 
-	private void createLoadFileTaskFragment() {
-		FragmentManager fm = getSupportFragmentManager();
-		// see if fragment was already created
-		loadFileTaskFragment = (LoadFileTaskFragment) fm
-				.findFragmentByTag(LOAD_FILE_TASK_FRAGMENT);
-		// If the Fragment is non-null, then it is currently being
-		// retained across a configuration change.
-		if (loadFileTaskFragment == null) {
-			loadFileTaskFragment = LoadFileTaskFragment.getInstance();
-			fm.beginTransaction()
-					.add(loadFileTaskFragment, LOAD_FILE_TASK_FRAGMENT).commit();
-		}
-	}
-
-	private void createDeleteTeacherLanguageFragment() {
-		FragmentManager fm = getSupportFragmentManager();
-		deleteTeacherLanguageFragment = (DeleteTeacherLanguageFragment) fm
-				.findFragmentByTag(DELETE_TEACHER_TASK_FRAGMENT);
-		if (deleteTeacherLanguageFragment == null) {
-			deleteTeacherLanguageFragment = DeleteTeacherLanguageFragment
-					.getInstance();
-			fm.beginTransaction()
-					.add(deleteTeacherLanguageFragment, DELETE_TEACHER_TASK_FRAGMENT)
-					.commit();
-		}
-	}
-
-	// The interface methods below are called by the LoadFileTaskFragment when
-	// new progress updates or results are available. Call dialog and
-	// LanguageMaintenanceFragment to update UI's
-	// IAsyncCallBacks method
-	@Override
-	public void onPreExecute() {
-		saveBackgroundTaskDetails(selectedOp, GlobalValues.RUNNING,
-				maintOpDetails.toString());
-		updateMenuAndStatusDisplay();
-		if (progressDialog == null) {
-			showProgressDialog();
-		}
-	}
-
-	// IAsyncCallBacks method
-	@Override
-	public void onProgressUpdate(final int percent) {
-		if (progressDialog == null) {
-			showProgressDialog();
-		}
-		progressDialog.setProgress(percent);
-
-	}
-
-	// IAsyncCallBacks method
-	@Override
-	public void onPostExecute(int completionCode, String errorMsg) {
-		if (progressDialog != null) {
-			progressDialog.dismiss();
-			progressDialog = null;
-		}
-		maintenanceStatus = completionCode;
-		languageSettings.setMaintenanceStatus(maintenanceStatus).commit();
-		// updateMenuOptions();
-		if (completionCode == GlobalValues.CANCELLED) {
-			showDialog(
-					res.getString((selectedOp == GlobalValues.LOAD) ? R.string.load_cancelled
-							: R.string.delete_cancelled),
-					(selectedOp == GlobalValues.LOAD) ? LOAD_CANCELLED
-							: DELETE_CANCELLED, R.string.ok, -1, -1);
-		} else if (completionCode == GlobalValues.FINISHED_WITH_ERROR) {
-			showErrorDialog(errorMsg);
-
-		} else if (completionCode == GlobalValues.FINISHED_OK) {
-			showDialog(
-					res.getString((selectedOp == GlobalValues.LOAD) ? R.string.language_file_loaded_successfully
-							: R.string.deletion_completed_successfully),
-					(selectedOp == GlobalValues.LOAD) ? LOAD_SUCCESSFUL
-							: DELETE_SUCCESSFUL, R.string.ok, -1, -1);
-		}
-		updateMenuAndStatusDisplay();
-	}
-
-	// end of interface methods
-
-	private void showProgressDialog() {
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		// progressDialog.setMessage("Loading...");
-		progressDialog.setProgress(0);
-		progressDialog.setMax(100);
-		// progressDialog.setIndeterminate(true);
-		progressDialog.setOnCancelListener(new OnCancelListener() {
-
-			public void onCancel(DialogInterface arg0) {
-				// back button pressed
-				showDialog(res
-						.getString(R.string.do_you_want_to_cancel_current_operation),
-						CANCEL_OP, R.string.cancel, R.string.continuex, -1);
-
-			}
-		});
-		progressDialog.setCancelable(true);
-
-		progressDialog.show();
+	private void checkForLoadRequest() {
+		bundleFileUrl = getIntent().getStringExtra(LOAD_FROM_BUNDLE);
 	}
 
 	private void updateMenuAndStatusDisplay() {
@@ -273,7 +175,7 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 			return true;
 		case R.id.load_from_web:
 			loadError = false;
-			selectedOp = GlobalValues.LOAD;
+			selectedOp = GlobalValues.LOAD_FROM_WEB;
 			loadFromWeb();
 			return true;
 		case R.id.delete_teacher_language_class:
@@ -283,20 +185,10 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 			showTeacherLanguageSelectDialog();
 			return true;
 		case R.id.cancel_task:
-			if (loadFileTaskFragment != null) {
-				loadFileTaskFragment.cancelTask();
-			}
-			languageSettings.setMaintenanceStatus(GlobalValues.CANCELLED).commit();
-			updateMenuAndStatusDisplay();
+			showDialog(
+					res.getString(R.string.do_you_want_to_cancel_current_operation),
+					CANCEL_OP, R.string.cancel, R.string.continuex, -1);
 			return true;
-			// case R.id.reset_background_task:
-			// maintenanceStatus = RESET;
-			// cancel = true;
-			// languageSettings.setMaintenanceStatus(maintenanceStatus);
-			// languageSettings.commit();
-			// displayLastTaskDetails();
-			// return true;
-
 		case R.id.backup_restore_language_database:
 			Intent intent = new Intent(this, BackupRestoreActivity.class);
 			startActivity(intent);
@@ -310,20 +202,32 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 	@Override
 	public void onResume() {
 		super.onResume();
+		checkForBundleLoadRequest();
 		updateMenuOptions();
 		updateMenuAndStatusDisplay();
-//		if (maintenanceType != -1) {
-//			if (languageMaintenanceFragment != null) {
-//				languageMaintenanceFragment.updateStatusDisplay();
-//			}
-//		}
+		registerBroadcastReceiver();
+
+	}
+
+	private void checkForBundleLoadRequest() {
+		if (bundleFileUrl != null) {
+			// ensure cancel is done
+			//cancelService();
+			// then display confirm dialog
+			showDialog(res.getString(R.string.languge_file_to_be_loaded_from_url,
+					bundleFileUrl), CONFIRM_WEB_LOAD_FROM_BUNDLE, R.string.load,
+					R.string.cancel, -1);
+
+		}
+	}
+
+	private void registerBroadcastReceiver() {
 		LocalBroadcastManager
 				.getInstance(this)
 				.registerReceiver(
 						webLoadReceiver,
 						new IntentFilter(
-								LoadLanguageLessonService.LOAD_LANGUAGE_LESSON_SERVICE_UPDATE));
-
+								LanguageMaintenanceService.LOAD_LANGUAGE_LESSON_SERVICE_UPDATE));
 	}
 
 	@Override
@@ -342,6 +246,15 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 		super.onStop();
 	}
 
+	// public void onBackPressed() {
+	// if (languageSettings.getMaintenanceStatus() == GlobalValues.RUNNING) {
+	// showDialog(
+	// res.getString(R.string.do_you_want_to_cancel_current_operation),
+	// CANCEL_OP, R.string.cancel, R.string.continuex, -1);
+	// } else
+	// finish();
+	// }
+
 	private boolean checkForMaintenanceTask() {
 		maintenanceType = languageSettings.getMaintenanceType();
 		maintenanceStatus = languageSettings.getMaintenanceStatus();
@@ -349,6 +262,7 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 			return true;
 		return false;
 	}
+
 	private void loadFromDevice() {
 		// display dialog to get/confirm languagefile to load from device
 		// use demo file as default
@@ -372,10 +286,6 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 			showDialog(res.getString(R.string.language_file_details_to_confirm,
 					maintOpDetails), CONFIRM_LOAD, R.string.load, R.string.cancel,
 					-1);
-			// created fragment here as onAttach in fragment happening after
-			// onPreExecute() from asynctask (I am guessing that onPreExecute is
-			// still on UI thread)
-			createLoadFileTaskFragment();
 		}
 	}
 
@@ -410,9 +320,10 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 			// first byte in file appears to be byte order mark (BOM)
 			// http://en.wikipedia.org/wiki/Byte_order_mark
 			// so on first read drop the BOM
-//			br = new BufferedReader(new InputStreamReader(
-//					new FileInputStream(file), "UTF-16LE"));
-			// Spreadsheet file now created with UTF-8 which is default for java so don't specify
+			// br = new BufferedReader(new InputStreamReader(
+			// new FileInputStream(file), "UTF-16LE"));
+			// Spreadsheet file now created with UTF-8 which is default for java so
+			// don't specify
 			br = new BufferedReader(new InputStreamReader(
 					new FileInputStream(file)));
 			String line;
@@ -461,11 +372,12 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 		if (0 == tokens[0].compareTo(TEACHER_LANGUAGE)) {
 			sb.append(res.getText(R.string.language_to_be_learned) + ":"
 					+ tokens[1] + lineSeparator);
-			if (!tokens[2].equals("")){
-				learningLanguageMediaDirectory = Environment.DIRECTORY_DOWNLOADS + "/"
-						+ tokens[2];
+			if (!tokens[2].equals("")) {
+				learningLanguageMediaDirectory = Environment.DIRECTORY_DOWNLOADS
+						+ "/" + tokens[2];
 				sb.append(res.getText(R.string.media_files_directory) + ":"
-						+ learningLanguageMediaDirectory + lineSeparator + lineSeparator);
+						+ learningLanguageMediaDirectory + lineSeparator
+						+ lineSeparator);
 				sb.append(res.getText(R.string.known_language) + ":" + tokens[3]
 						+ lineSeparator);
 				knownLanguageMediaDirectory = Environment.DIRECTORY_DOWNLOADS + "/"
@@ -473,9 +385,11 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 				sb.append(res.getText(R.string.media_files_directory) + ":"
 						+ knownLanguageMediaDirectory);
 			}
-			// if no learning media directory defined either and error or all the media needs to be read from some website (eg. Youtube)
+			// if no learning media directory defined either and error or all the
+			// media needs to be read from some website (eg. Youtube)
 			else {
-				sb.append(res.getText(R.string.no_learning_media_directory_defined) + lineSeparator + lineSeparator);
+				sb.append(res.getText(R.string.no_learning_media_directory_defined)
+						+ lineSeparator + lineSeparator);
 			}
 			return ++i;
 		}
@@ -525,7 +439,7 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 		}
 		return success;
 	}
-	
+
 	private void loadFromWeb() {
 		// first check to make sure have web access turned on
 		// display dialog to get Web URL from which to load file
@@ -540,10 +454,10 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 
 	}
 
-	
-// display DeleteTeacherLanguageDialog
+	// display DeleteTeacherLanguageDialog
 	private void showTeacherLanguageSelectDialog() {
-		LessonSelectionDialog deleteTeacherLanguageDialog = LessonSelectionDialog.newInstance(LessonSelectionDialog.TEACHER_LANGUAGE_DELETE, -1);
+		LessonSelectionDialog deleteTeacherLanguageDialog = LessonSelectionDialog
+				.newInstance(LessonSelectionDialog.TEACHER_LANGUAGE_DELETE, -1);
 		deleteTeacherLanguageDialog.setOnDialogResultListener(this,
 				SELECT_TEACHER_LANGUAGE_TO_DELETE);
 		deleteTeacherLanguageDialog.show(this.getSupportFragmentManager(),
@@ -572,8 +486,8 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 		dialog.show(this.getSupportFragmentManager(), "confirmDialog");
 	}
 
-	
-
+	// At some point put into a switch statement and break up sublogic into
+	// separate methods
 	@Override
 	public void onDialogResult(int requestCode, int resultCode,
 			int buttonPressed, Bundle bundle) {
@@ -583,7 +497,7 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 			updateMenuAndStatusDisplay();
 			return;
 		}
-		//-----------------------------------------------------------------------------------
+		// -----------------------------------------------------------------------------------
 		// This is for Load from device
 		if (requestCode == GlobalValues.LOAD) {
 			if (resultCode != Activity.RESULT_OK) {
@@ -592,9 +506,9 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 				if (buttonPressed == DialogInterface.BUTTON_POSITIVE) {
 					// get the load file name
 					if (bundle != null) {
-						loadFileDevice  = bundle
+						loadFileDevice = bundle
 								.getString(LanguageDialogFragment.LANGUAGE_DIALOG_TEXT_ENTRY);
-						if (loadFileDevice != null  && !loadFileDevice.equals("")) {
+						if (loadFileDevice != null && !loadFileDevice.equals("")) {
 							checkFileAndConfirmDetails();
 						} else {
 							showDialog(
@@ -611,12 +525,12 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 				return;
 			} else {
 				if (buttonPressed == DialogInterface.BUTTON_POSITIVE) {
-					startLoadProcess();
+					startLoadFromDevice();
 				}
 				return;
 			}
 		}
-		//-----------------------------------------------------------------------------------
+		// -----------------------------------------------------------------------------------
 		// This is for Load from the web
 		if (requestCode == GlobalValues.LOAD_FROM_WEB) {
 			if (resultCode != Activity.RESULT_OK) {
@@ -653,7 +567,26 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 			}
 			return;
 		}
-		//-----------------------------------------------------------------------------------
+		// -----------------------------------------------------------------------------------
+		// This is for Load from the web but the request was initiated by the url
+		// that came in
+		// on a bundle in onCreate
+		if (requestCode == CONFIRM_WEB_LOAD_FROM_BUNDLE) {
+			if (resultCode != Activity.RESULT_OK) {
+				// if not ok return from whence you came
+				finish();
+			} else {
+				if (buttonPressed == DialogInterface.BUTTON_POSITIVE) {
+					loadFileUrl = bundleFileUrl;
+					selectedOp = GlobalValues.LOAD_FROM_WEB;
+					startLoadFromURL();
+					// this is so if there is an orientation change, onResume won't display the load dialog again.
+					getIntent().putExtra(LOAD_FROM_BUNDLE, (String) null);
+				}
+			}
+			return;
+		}
+		// -----------------------------------------------------------------------------------
 		// This is for deleting a teacher/language
 		if (requestCode == SELECT_TEACHER_LANGUAGE_TO_DELETE) {
 			if (resultCode != Activity.RESULT_OK) {
@@ -674,10 +607,6 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 					teacherFromToLanguage.getLearningLanguageName(),
 					teacherFromToLanguage.getKnownLanguageName()), CONFIRM_DELETE,
 					R.string.delete, R.string.cancel, -1);
-			// created fragment here as onAttach in fragment happening after
-			// onPreExecute() from asynctask (I am guessing that onPreExecute is
-			// still on UI thread)
-			createDeleteTeacherLanguageFragment();
 			return;
 		}
 		if (requestCode == CONFIRM_DELETE) {
@@ -690,53 +619,48 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 			}
 			return;
 		}
-		//-----------------------------------------------------------------------------------
+		// -----------------------------------------------------------------------------------
 		// This is to cancel whatever you were doing
 		if (requestCode == CANCEL_OP) {
 			if (resultCode != Activity.RESULT_OK) {
 				return;
 			} else {
 				if (buttonPressed == DialogInterface.BUTTON_POSITIVE) {
-					if (selectedOp == GlobalValues.LOAD)
-						loadFileTaskFragment.cancelTask();
-					else {
-						deleteTeacherLanguageFragment.cancelTask();
-					}
+					// service may or may not be running
+					cancelService();
 				} else {
-					progressDialog.show();
-
+					if (progressDialog != null) {
+						progressDialog.show();
+					}
 				}
 			}
 			return;
 		}
-	
-	}
-
-	private void startDeleteProcess() {
-		updateMenuOptions();
-		maintOpDetails.setLength(0);
-		maintOpDetails.append(res.getString(R.string.delete_details,
-				teacherFromToLanguage.getTeacherName(),
-				teacherFromToLanguage.getLearningLanguageName(),
-				teacherFromToLanguage.getKnownLanguageName()));
-		deleteTeacherLanguageFragment.startDeleteProcess(teacherFromToLanguage);
 
 	}
 
-	private void startLoadProcess() {
+	private void cancelService() {
+		languageSettings.setMaintenanceStatus(GlobalValues.CANCELLED).commit();
+		stopService(new Intent(this, LanguageMaintenanceService.class));
+		updateMenuAndStatusDisplay();
+	}
+
+	private void startLoadFromDevice() {
 		updateMenuOptions();
 		if (checkCreateMediaDirectories()) {
-			loadFileTaskFragment.startFileLoad(languageFile);
+			// loadFileTaskFragment.startFileLoad(languageFile);
+			// receiver should be registered before this is called
+			Intent intent = new Intent(this, LanguageMaintenanceService.class);
+			intent.putExtra(LanguageMaintenanceService.SERVICE_CALL,
+					LanguageMaintenanceService.SERVICE_LOAD);
+			intent.putExtra(LanguageMaintenanceService.DOWNLOAD_TYPE,
+					LanguageMaintenanceService.FROM_FILE);
+			intent.putExtra(LanguageMaintenanceService.LOAD_URL, loadFileDevice);
+			startService(intent);
+			saveBackgroundTaskDetails(selectedOp, GlobalValues.RUNNING,
+					maintOpDetails.toString());
+			updateMenuAndStatusDisplay();
 		}
-	}
-
-	public void onBackPressed() {
-		if (languageSettings.getMaintenanceStatus() == GlobalValues.RUNNING) {
-			showDialog(
-					res.getString(R.string.do_you_want_to_cancel_current_operation),
-					CANCEL_OP, R.string.cancel, R.string.continuex, -1);
-		} else
-			finish();
 	}
 
 	private void startLoadFromURL() {
@@ -754,10 +678,34 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 		}
 
 		// receiver should be registered before this is called
-		Intent intent = new Intent(this, LoadLanguageLessonService.class);
-		intent.putExtra(LoadLanguageLessonService.LANGUAGE_LESSON_URL,
-				loadFileUrl);
+		Intent intent = new Intent(this, LanguageMaintenanceService.class);
+		intent.putExtra(LanguageMaintenanceService.SERVICE_CALL,
+				LanguageMaintenanceService.SERVICE_LOAD);
+		intent.putExtra(LanguageMaintenanceService.DOWNLOAD_TYPE,
+				LanguageMaintenanceService.FROM_WEB);
+		intent.putExtra(LanguageMaintenanceService.LOAD_URL, loadFileUrl);
 		startService(intent);
+		saveBackgroundTaskDetails(selectedOp, GlobalValues.RUNNING,
+				maintOpDetails.toString());
+		updateMenuAndStatusDisplay();
+
+	}
+
+	private void startDeleteProcess() {
+		updateMenuOptions();
+		maintOpDetails.setLength(0);
+		maintOpDetails.append(res.getString(R.string.delete_details,
+				teacherFromToLanguage.getTeacherName(),
+				teacherFromToLanguage.getLearningLanguageName(),
+				teacherFromToLanguage.getKnownLanguageName()));
+		Intent intent = new Intent(this, LanguageMaintenanceService.class);
+		intent.putExtra(LanguageMaintenanceService.SERVICE_CALL,
+				LanguageMaintenanceService.SERVICE_DELETE);
+		intent.putExtra(LanguageMaintenanceService.TEACHER_LANGUAGE,
+				teacherFromToLanguage);
+		startService(intent);
+		saveBackgroundTaskDetails(selectedOp, GlobalValues.RUNNING,
+				maintOpDetails.toString());
 
 	}
 
@@ -766,10 +714,75 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 	private BroadcastReceiver webLoadReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			// currently not expecting any data in intent
-			// tell fragment to update status display
+			// get current status message
+			// see if %complete being populated
+			statusMessage = intent
+					.getStringExtra(LanguageMaintenanceService.STATUS);
+			percentComplete = intent.getIntExtra(
+					LanguageMaintenanceService.PERCENT_COMPLETE, -1);
 			updateMenuAndStatusDisplay();
+			if (percentComplete < 100) {
+				showProgressDialog(percentComplete, statusMessage);
+			} else {
+				// a bit of hack until the load process rewritten to be like the
+				// delete process
+				onCompletionOfService(languageSettings.getMaintenanceStatus(),
+						statusMessage);
+			}
 		}
 	};
+
+	private void showProgressDialog(int percentComplete, String statusMessage) {
+		if (progressDialog == null) {
+			progressDialog = new ProgressDialog(this);
+		}
+		if (percentComplete < 0) {
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		} else {
+			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+			progressDialog.setProgress(percentComplete);
+			progressDialog.setMax(100);
+		}
+		progressDialog.setMessage(statusMessage);
+		// progressDialog.setIndeterminate(true);
+		// progressDialog.setOnCancelListener(new OnCancelListener() {
+		// public void onCancel(DialogInterface arg0) {
+		// // back button pressed
+		// showDialog(res
+		// .getString(R.string.do_you_want_to_cancel_current_operation),
+		// CANCEL_OP, R.string.cancel, R.string.continuex, -1);
+		//
+		// }
+		// });
+		// progressDialog.setCancelable(true);
+		progressDialog.show();
+	}
+
+	public void onCompletionOfService(int completionCode, String errorMsg) {
+		if (progressDialog != null) {
+			progressDialog.dismiss();
+			progressDialog = null;
+		}
+		maintenanceStatus = completionCode;
+		languageSettings.setMaintenanceStatus(maintenanceStatus).commit();
+		// updateMenuOptions();
+		if (completionCode == GlobalValues.CANCELLED) {
+			showDialog(
+					res.getString((selectedOp == GlobalValues.LOAD || selectedOp == GlobalValues.LOAD_FROM_WEB) ? R.string.load_cancelled
+							: R.string.delete_cancelled),
+					(selectedOp == GlobalValues.LOAD || selectedOp == GlobalValues.LOAD_FROM_WEB) ? LOAD_CANCELLED
+							: DELETE_CANCELLED, R.string.ok, -1, -1);
+		} else if (completionCode == GlobalValues.FINISHED_WITH_ERROR) {
+			showErrorDialog(errorMsg);
+
+		} else if (completionCode == GlobalValues.FINISHED_OK) {
+			showDialog(
+					res.getString((selectedOp == GlobalValues.LOAD || selectedOp == GlobalValues.LOAD_FROM_WEB) ? R.string.language_file_loaded_successfully
+							: R.string.deletion_completed_successfully),
+					(selectedOp == GlobalValues.LOAD || selectedOp == GlobalValues.LOAD_FROM_WEB) ? LOAD_SUCCESSFUL
+							: DELETE_SUCCESSFUL, R.string.ok, -1, -1);
+		}
+		updateMenuAndStatusDisplay();
+	}
 
 }

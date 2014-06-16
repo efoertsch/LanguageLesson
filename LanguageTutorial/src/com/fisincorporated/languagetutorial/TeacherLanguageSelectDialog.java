@@ -114,7 +114,7 @@ public class TeacherLanguageSelectDialog extends DialogFragment {
 	}
 
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		res = getActivity().getResources();
+		res = getResources();
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		builder.setTitle(res.getString(R.string.select_to_delete));
 		View v = getActivity().getLayoutInflater().inflate(

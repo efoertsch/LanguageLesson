@@ -24,7 +24,7 @@ import com.fisincorporated.languagetutorial.db.Teacher;
 import com.fisincorporated.languagetutorial.db.TeacherDao;
 import com.fisincorporated.languagetutorial.db.TeacherLanguage;
 import com.fisincorporated.languagetutorial.db.TeacherLanguageDao;
-import com.fisincorporated.languagetutorial.interfaces.ILoadLessonCallBack;
+import com.fisincorporated.languagetutorial.interfaces.ILessonMaintanceCallBack;
 
 import de.greenrobot.dao.query.DeleteQuery;
 import de.greenrobot.dao.query.Query;
@@ -77,21 +77,21 @@ public class LanguageLessonLoader {
 
 	private Resources res;
 	 
-	ILoadLessonCallBack loadLessonCallBack;
+	ILessonMaintanceCallBack lessonMaintanceCallBack;
 
 	private String learningLanguageMediaDirectory = "";
 
 	private String knownLanguageMediaDirectory = "";
 	
-	public LanguageLessonLoader(Context context, ILoadLessonCallBack loadLessonCallBack) {
+	public LanguageLessonLoader(Context context, ILessonMaintanceCallBack lessonMaintanceCallBack) {
 		res = context.getResources();
-		this.loadLessonCallBack = loadLessonCallBack;
+		this.lessonMaintanceCallBack = lessonMaintanceCallBack;
 		setupDao() ;
 	}
 	
    // call back with message (most likely error message)
 	private void passbackMessage(String message, boolean error) {
-		loadLessonCallBack.passbackMessage(message, error);
+		lessonMaintanceCallBack.passbackMessage(message, error);
 	}
 	
 	

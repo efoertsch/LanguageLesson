@@ -116,28 +116,17 @@ public abstract class AbstractMediaPlayerFragment extends Fragment implements
 		}
 	}
 
-	// @Override
-	// public void onStart() {
-	// super.onStart();
-	// setupMediaPlayer();
-	// }
+
 
 	// so that mediacontroller view displays properly in anchor view
 	abstract void resetAnchorView();
 
-	// @Override
-	// public abstract View onCreateView(LayoutInflater inflater, ViewGroup
-	// parent,
-	// Bundle savedInstanceState);
-
-	// Add the menu - Will add to any menu items added by parent activity
+	
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
-		// Add the menu
 		inflater.inflate(R.menu.media_player_menu, menu);
 	}
 
-	// handle the selected menu option
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.restart_lesson:
@@ -155,6 +144,7 @@ public abstract class AbstractMediaPlayerFragment extends Fragment implements
 		Log.i(TAG, "SetUpMediaPlayer");
 		// audioManager = (AudioManager) getActivity().getSystemService(
 		// Context.AUDIO_SERVICE);
+		mediaController = null;
 		mediaPlayer = null;
 		mediaPlayer = new MediaPlayer();
 		Log.i(TAG, " SetupMediaPlayer  created MediaPlayer");
@@ -162,18 +152,9 @@ public abstract class AbstractMediaPlayerFragment extends Fragment implements
 		mediaPlayer.setOnPreparedListener(this);
 		mediaPlayer.setOnErrorListener(this);
 		mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-
-		mediaController = null;
+		
 		mediaController = new MediaController(getActivity());
-		// If controller is always displayed the back button won't work nor will
-		// the menu items fire
-		// mediaController = new MediaController(getActivity()){
-		// @Override
-		// public void hide() {
-		// //Do not hide.
-		// }
-		// };
-		resetAnchorView();
+		//resetAnchorView();
 		mediaController.setAnchorView(anchorView);
 		mediaController.setMediaPlayer(this);
 
@@ -182,16 +163,8 @@ public abstract class AbstractMediaPlayerFragment extends Fragment implements
 	// play the Media
 	void playMedia() {
 		String datasource = "";
-		// int result = audioManager.requestAudioFocus(this,
-		// AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-		// if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-		// // could not get audio focus.
-		// Toast.makeText(getActivity(), R.string.system_not_allowing_this_audio,
-		// Toast.LENGTH_LONG).show();
-		// }
 
 		try {
-			// if (mediaPlayer.isPlaying()) {
 			if (isPlaying() || playerPaused) {
 				mediaPlayer.stop();
 				playerIdle = true;
@@ -300,6 +273,8 @@ public abstract class AbstractMediaPlayerFragment extends Fragment implements
 		if (mediaPlayer != null) {
 			playerPaused = false;
 			mediaPlayer.start();
+			//!!! when attached to debugger and running audioPlayerFragment the mediaController.show(0) will always crash!
+			// when not running in debugger it will work OK. Go figure!!!!
 			mediaController.show(0);
 		}
 	}
@@ -310,7 +285,6 @@ public abstract class AbstractMediaPlayerFragment extends Fragment implements
 			playerPaused = true;
 			mediaPlayer.pause();
 		}
-
 	}
 
 	public int getDuration() {
@@ -363,54 +337,6 @@ public abstract class AbstractMediaPlayerFragment extends Fragment implements
 		return 0;
 	}
 
-	public void setAlwaysDisplay(boolean alwaysDisplay) {
-		this.alwaysDisplay = alwaysDisplay;
-	}
-
-	// --------------------------------------------------------------------------------
-
-	// From OnAudioFocusChangeListener
-	// public void onAudioFocusChange(int focusChange) {
-	// switch (focusChange) {
-	// case AudioManager.AUDIOFOCUS_GAIN:
-	// // resume playback
-	// if (mediaPlayer == null)
-	// setupMediaPlayer();
-	// else if (!mediaPlayer.isPlaying())
-	// mediaPlayer.start();
-	// mediaPlayer.setVolume(1.0f, 1.0f);
-	// break;
-	//
-	// case AudioManager.AUDIOFOCUS_LOSS:
-	// // Lost focus for an unbounded amount of time: stop playback and
-	// // release media player
-	// if (mediaPlayer != null) {
-	// if (mediaPlayer.isPlaying())
-	// mediaPlayer.stop();
-	// mediaPlayer.release();
-	// mediaPlayer = null;
-	// }
-	// break;
-	//
-	// case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-	// // Lost focus for a short time, but we have to stop
-	// // playback. We don't release the media player because playback
-	// // is likely to resume
-	// if (mediaPlayer != null) {
-	// if (mediaPlayer.isPlaying())
-	// mediaPlayer.pause();
-	// }
-	// break;
-	//
-	// case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-	// // Lost focus for a short time, but it's ok to keep playing
-	// // at an attenuated level
-	// if (mediaPlayer != null) {
-	// if (mediaPlayer.isPlaying())
-	// mediaPlayer.setVolume(0.1f, 0.1f);
-	// }
-	// break;
-	// }
-	// }
+	 
 
 }

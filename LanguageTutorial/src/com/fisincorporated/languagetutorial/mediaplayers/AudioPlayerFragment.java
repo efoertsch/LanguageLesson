@@ -1,6 +1,9 @@
 package com.fisincorporated.languagetutorial.mediaplayers;
 
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -8,11 +11,15 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.fisincorporated.languagetutorial.R;
 
+// on orientation change getting error on mediaController.show(0)
+
+// tried http://stackoverflow.com/questions/17897162/mediacontroller-error-when-show-called
 public class AudioPlayerFragment extends AbstractMediaPlayerFragment {
 	private static final String TAG = "AudioPlayerFragment";
 	private RelativeLayout rlAudioView = null;
@@ -28,12 +35,14 @@ public class AudioPlayerFragment extends AbstractMediaPlayerFragment {
 			Bundle savedInstanceState) {
 		Log.i(TAG, " onCreateView");
 		View v = inflater.inflate(R.layout.media_player_audio, parent, false);
+		rootView = v;
+		anchorView = (FrameLayout) v.findViewById(R.id.controllerAnchor);
 		rlAudioView = (RelativeLayout) v.findViewById(R.id.rlAudioView);
 		tvLessonTitle = (TextView) v.findViewById(R.id.tvLessonTitle);
 		tvLessonTitle.setText(lessonTitle);
 		tvLessonDescription = (TextView) v.findViewById(R.id.tvLessonDescription);
 		tvLessonDescription.setText(lessonDescription);
-		anchorView = (FrameLayout) v.findViewById(R.id.controllerAnchor);
+		
 		rlAudioView.setOnTouchListener(new OnTouchListener(){
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -51,20 +60,21 @@ public class AudioPlayerFragment extends AbstractMediaPlayerFragment {
 	 
 	 @Override
 		public void onResume() {
-			Log.i(TAG, " on Resume");
-			super.onResume();
+			Log.i(TAG, " on Start");
+			super.onStart();
 			setupMediaPlayer();
 			playMedia();
 		}
 	 
+	
+	 
 		@Override
 		public void onPause() {
 			Log.i(TAG, " onPause");
-			super.onPause();
-			if (mediaController != null) {
-				mediaController.hide();
-				Log.i(TAG, " onPause  - hide controller");
-			}
+//			if (mediaController != null) {
+//				mediaController.hide();
+//				Log.i(TAG, " onPause  - hide controller");
+//			}
 			if (mediaPlayer != null) {
 				try {
 					currentPosition = mediaPlayer.getCurrentPosition();
@@ -76,7 +86,7 @@ public class AudioPlayerFragment extends AbstractMediaPlayerFragment {
 					mediaPlayer = null;
 					mediaController = null;
 					Log.i(TAG,
-							" onPause - stopped/released and set to null mediaPlayer/mediaController");
+							" onDestroyView - stopped/released and set to null mediaPlayer/mediaController");
 				} catch (Exception e) {
 					;
 				}
@@ -84,6 +94,7 @@ public class AudioPlayerFragment extends AbstractMediaPlayerFragment {
 			if (wifiLock != null) {
 				wifiLock.release();
 			}
+			super.onPause();
 
 		}
 }

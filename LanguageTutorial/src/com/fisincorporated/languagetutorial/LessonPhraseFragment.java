@@ -198,7 +198,7 @@ public class LessonPhraseFragment extends ListFragment implements
 		languageSettings = LanguageSettings.getInstance(getActivity());
 		// always start at beginning of lesson
 		lessonLineIndex = -1;
-		languageSettings.setLastLessonPhraseLine(lessonLineIndex);
+		languageSettings.setLastLessonPhraseLine(lessonLineIndex).commit();
 	}
 
 	private void setupDatabaseAccess() {

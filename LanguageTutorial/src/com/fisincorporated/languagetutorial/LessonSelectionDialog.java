@@ -111,13 +111,6 @@ public class LessonSelectionDialog extends DialogFragment {
 	private int classNamePosition = -1;
 	private int lessonPosition = -1;
 
-	// spinners onItemSelected fire when spinners first initialized
-	// these flags are used so first fire event ignored
-	private boolean processTeacherSelection = false;
-	private boolean processTeacherLanguageSelection = false;
-	private boolean processClassNameSelection = false;
-	private boolean processLessonSelection = false;
-
 	// used to store values to SharedPreferences file
 	private static LanguageSettings languageSettings;
 	private static Resources res;
@@ -174,7 +167,7 @@ public class LessonSelectionDialog extends DialogFragment {
 	}
 
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		res = getActivity().getResources();
+		res = getResources();
 		getDialogDetails(savedInstanceState);
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		builder.setTitle(res.getString(dialogTitle));
@@ -192,10 +185,6 @@ public class LessonSelectionDialog extends DialogFragment {
 		spnrTeacher.setOnItemSelectedListener(new OnItemSelectedListener() {
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int position, long id) {
-//				if (!processTeacherSelection) {
-//					processTeacherSelection = true;
-//					return;
-//				}
 				if((Integer)spnrTeacher.getTag(R.id.spnrTeacherPos) == position){
 					return;
 				}
@@ -232,10 +221,6 @@ public class LessonSelectionDialog extends DialogFragment {
 		.setOnItemSelectedListener(new OnItemSelectedListener() {
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int position, long id) {
-//				if (!processTeacherLanguageSelection) {
-//					processTeacherLanguageSelection = true;
-//					return;
-//				}
 				if((Integer)spnrTeacherLanguage.getTag(R.id.spnrTeacherLanguagePos) == position){
 					return;
 				}
@@ -283,10 +268,6 @@ public class LessonSelectionDialog extends DialogFragment {
 		spnrClassName.setOnItemSelectedListener(new OnItemSelectedListener() {
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int position, long id) {
-//				if (!processClassNameSelection) {
-//					processClassNameSelection = true;
-//					return;
-//				}
 				if((Integer)spnrClassName.getTag(R.id.spnrClassNamePos) == position){
 					return;
 				}
@@ -319,10 +300,6 @@ public class LessonSelectionDialog extends DialogFragment {
 		spnrLesson.setOnItemSelectedListener(new OnItemSelectedListener() {
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int position, long id) {
-//				if (!processLessonSelection) {
-//					processLessonSelection = true;
-//					return;
-//				}
 				if((Integer)spnrLesson.getTag(R.id.spnrLessonPos) == position){
 					return;
 				}
@@ -608,7 +585,7 @@ public class LessonSelectionDialog extends DialogFragment {
 
 	private int getPosition(ArrayList<? extends DomainObject> list, Long id) {
 		for (int i = 0; i < list.size(); ++i) {
-			if (id == list.get(i).getId()) {
+			if (id.equals(list.get(i).getId())) {
 				return i;
 			}
 		}
@@ -773,10 +750,6 @@ public class LessonSelectionDialog extends DialogFragment {
 	public void onDestroyView() {
 		if (getDialog() != null && getRetainInstance()) {
 			// if crash occurs try getDialog().setDismissMessage(null);
-			processTeacherSelection = false;
-			processTeacherLanguageSelection = false;
-			processClassNameSelection = false;
-			processLessonSelection = false;
 			getDialog().setOnDismissListener(null);
 		}
 		super.onDestroyView();

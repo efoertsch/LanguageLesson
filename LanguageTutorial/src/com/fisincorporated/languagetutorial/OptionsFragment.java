@@ -45,7 +45,7 @@ public abstract class OptionsFragment extends MasterFragment {
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		res = getActivity().getResources();
+		res = getResources();
 		setRetainInstance(true);
 		languageSettings = LanguageSettings.getInstance(getActivity());
 		getOptionValues();

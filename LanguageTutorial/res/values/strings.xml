@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools"
+  tools:ignore="MissingTranslation" >
 
     <string name="a_lesson_must_be_selected_first">A lesson must be selected first.</string>
     <string name="a_class_must_be_selected_first">A lesson must be selected first.</string>
     <string name="about">About</string>
+    <string name="about_string_1"><b>Teach a Language! Learn a Language!</b>\n\nLanguageLesson provides a framework for anyone to create and conduct language lessons.\n\nThere on no lessons loaded when the app is first installed. There are however 2 small demo lessons you can install to see how the app works.\n</string>
+    <string name="about_string_2">1. Turkish - This demonstrates how text and short audio phrases are presented. (My apologies to Turkey for my poor Turkish pronunciation!)</string>
+    <string name="about_string_3">\n2. Japanese - This demonstrates how Youtube videos can be organized into lessons. (<b>Disclaimer</b> - The Youtube videos were produced by the Japanese Society of NYC and there is no connection between this project and the Japanese society. The videos were picked just to demonstrate how videos can be organized in lessons in this app.)</string>
+    <string name="about_string_4">\nThe steps to create your own set of language lessons are at http://fisincorporated.com/language-lesson/\n\nPlease email Eric Foertsch (efoertsch@fisincorporated.com) with bug reports or enhancement requests.</string>
     <string name="action_settings">Settings</string>
     <string name="app_name">LanguageLesson</string>
     <string name="audio">Audio</string>
+    <string name="audio_image">Audio image</string>
     <string name="audio_options_saved">Audio options saved. Press back to return.</string>
     <string name="after_learning_phrase">After learning phrase</string>
     <string name="backup">Backup</string>
@@ -42,7 +48,15 @@
     <string name="delete_teacher_language">Delete Teacher/Language</string>
     <string name="delete_teacher_language_class">Delete teacher/language/class</string>
     <string name="delete_teacher_language_confirmation">All classes, lessons and language phrases(if not used elsewhere) will be deleted for \nTeacher: %1$s \nLanguage to be learned: %2$s \nKnown Language: %3$s\n\n</string>
+    <string name="deleting_classes">Deleting classes.</string>
+    <string name="deleting_cross_references">Deleting cross references.</string>
+    <string name="deleting_language_phrases">Deleting language phrases.</string>
+    <string name="deleting_lessons_by_class">Deleting lessons by class.</string>
+    <string name="deleting_language_media">Deleting language media</string>
+    <string name="deleting_teacher_info">Deleting teacher info (if not used elsewhere)</string>
     <string name="demo_lesson_url">www.fisincorporated.com/languagelesson/Turkish_demo_download.txt</string>
+    <string name="demo_turkish_lesson_url">www.fisincorporated.com/languagelesson/Turkish_demo_download.txt</string>
+    <string name="demo_japanese_lesson_url">www.fisincorporated.com/languagelesson/Japanese_demo_download.txt</string>
     <string name="display_known_phrase_when_available">Display known phrase when available</string>
     <string name="description">Description</string>
     <string name="do_you_want_to_cancel_current_operation">Do you want to cancel the current operation?</string>
@@ -60,6 +74,7 @@
     <string name="first_record_not_teacher_record">First record in file is not a teacher record. The record is: %1$s</string>
     <string name="from_this_device">From this device</string>
     <string name="from_the_web">From the web</string>
+    <string name="getting_list_of_classes">Getting list of classes.</string>
     <string name="increase_text_size">Increase text size</string>
     <string name="invalid_order_or_speaker_or_interval_number">Invalid Order, speaker, or interval number on LessonPhrase line for Class: %1$s, Lesson: %2$s. Order and Speaker must be numbers but are Order: %3$s,  Speaker: %4$. Inteval may be blank or number and is %5$s. Please check your spreadsheet and recreate file.</string>
     <string name="invalid_number_repeatXTimes">Invalid number of repeats. It must be a number between %1$d and %2$d.</string>
@@ -74,7 +89,7 @@
     <string name="language_db_maintenance">Language Maintenance</string>
     <string name="language_file_details_to_confirm">Language File Details: \n %1$s.\n\nPress Load to load language file or Cancel.</string>
     <string name="language_file_loaded_successfully">Language file loaded successfully.</string>
-    <string name="languge_file_to_be_loaded_from_url">Language file to be loaded from URL : %1$s. Press Load to start load or Canel.</string>
+    <string name="languge_file_to_be_loaded_from_url">Language file to be loaded from URL : %1$s. Press Load to start load or Cancel.</string>
     <string name="language_integrity_reports">Language Integrity Reports</string>
     <string name="language_maintenance">Language Maintenance</string>
     <string name="language_phrase_xref_missing_for_lesson_phrase">LessonPhrase %1$s from Class: %2$s, Lesson: %3$s, Order: %4$s, Speaker:%5$s may not be listed in column A on the LanguagePhrase tab in the spreadsheet. Please check and recreate the file.</string>
@@ -105,6 +120,8 @@
     <string name="load_cancelled">Load Cancelled</string>
     <string name="load_in_progress">Load In Progress.</string>
     <string name="load_language_file">Load Language File</string>
+    <string name="load_turkish_lesson">Load Turkish demo lesson</string>
+    <string name="load_japanese_lesson">Load Japanese demo lesson</string>
     <string name="looks_like_an_error_loading_lesson">Looks like there was an error loading the lesson. Has a language file been loaded? And loaded successfully?</string>
     <string name="known_language_media_from">Known language media from %1$s. \n</string>
     <string name="media_files_directory">Media files must be stored in directory</string>
@@ -199,6 +216,7 @@
     <string name="too_few_language_phrase_fields">Too few language phrase fields. Please check/correct the LanguagePhrase tab on the spreadsheet and recreate file. These is what was read: %1$s.</string>
     <string name="unable_to_create_media_directory">Unable to create media directory: %1$s. Please check if sd card write protected. </string>
     <string name="undefined_maintenance_status_value">Undefined maintenance status value. It is %1$d.</string>
+    <string name="unzipping_file">Unzipping file: </string>
     <string name="system_not_allowing_this_audio">Unfortunately the system is not allowing audio to be played at this time. Are you playing music or using the phone for a phone call?</string>
     <string name="unexpected_exception">Unexpected Exception on loading language file.</string>
     <string name="unspecified_maintenance_opcode">Unspecified maintenance opcode : %1$d</string>

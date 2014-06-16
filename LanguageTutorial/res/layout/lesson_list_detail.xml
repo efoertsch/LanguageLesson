@@ -8,6 +8,7 @@
         android:id="@+id/tvLessonTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+         android:layout_marginLeft="@dimen/ts5sp"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView

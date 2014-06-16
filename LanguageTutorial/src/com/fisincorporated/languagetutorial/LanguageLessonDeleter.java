@@ -3,9 +3,9 @@ package com.fisincorporated.languagetutorial;
 import java.io.File;
 import java.util.ArrayList;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Environment;
 
 import com.fisincorporated.languagetutorial.db.ClassName;
@@ -23,13 +23,15 @@ import com.fisincorporated.languagetutorial.db.Teacher;
 import com.fisincorporated.languagetutorial.db.TeacherDao;
 import com.fisincorporated.languagetutorial.db.TeacherLanguage;
 import com.fisincorporated.languagetutorial.db.TeacherLanguageDao;
+import com.fisincorporated.languagetutorial.interfaces.ILessonMaintanceCallBack;
 import com.fisincorporated.languagetutorial.utility.LanguageSettings;
 
 import de.greenrobot.dao.query.DeleteQuery;
 import de.greenrobot.dao.query.Query;
 
-public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
-	private static final String TAG = "TeacherLanguageDelete";
+public class LanguageLessonDeleter {
+
+	private static final String TAG = "LanguageLessonDeleter";
 
 	private DaoSession daoSession;
 	private TeacherDao teacherDao;
@@ -51,32 +53,32 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 	private DeleteQuery<TeacherLanguage> teacherLanguageDeleteQuery;
 	private DeleteQuery<Teacher> teacherDeleteQuery;
 
-	//private ArrayList<ClassName> deleteClassList = new ArrayList<ClassName>();
 	private ArrayList<Lesson> deleteLessonList = new ArrayList<Lesson>();
-
-	//private long teacherId;
-	//private long teacherLanguageId;
-	private DeleteTeacherLanguageFragment deleteTeacherLanguageFragment;
 
 	private boolean deleteError = false;
 	private boolean cancel = false;
-	private String errorMsg = "";
+	private String message = "";
 	private Resources res;
 
 	private TeacherFromToLanguage teacherFromToLanguage;
+	LanguageSettings languageSettings;
 
 	private boolean dontDeletePhrasesAndMedia = false;
 
 	private ArrayList<ClassName> classNameList;
 	private int teacherCount = 0;
 
+	ILessonMaintanceCallBack lessonMaintanceCallBack;
+
 	// The fragment passed in should be non-ui fragment
-	public TeacherLanguageDelete(
-			DeleteTeacherLanguageFragment deleteTeacherLanguageFragment,
+	public LanguageLessonDeleter(Context context,
+			ILessonMaintanceCallBack lessonMaintanceCallBack,
 			TeacherFromToLanguage teacherFromToLanguage) {
-		this.deleteTeacherLanguageFragment = deleteTeacherLanguageFragment;
+		res = context.getResources();
+		languageSettings = LanguageSettings.getInstance(context);
+		this.lessonMaintanceCallBack = lessonMaintanceCallBack;
 		this.teacherFromToLanguage = teacherFromToLanguage;
-		res = deleteTeacherLanguageFragment.getActivity().getResources();
+		setupDao();
 
 	}
 
@@ -92,77 +94,63 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 		lessonPhraseDao = daoSession.getLessonPhraseDao();
 	}
 
-	@Override
-	protected void onPreExecute() {
-		if (deleteTeacherLanguageFragment == null)
-			return;
+	protected void runDelete() {
 		checkResetLanguageSettings();
-		deleteTeacherLanguageFragment.onPreExecute();
+		deleteProcess();
+		finishProcess();
+
 	}
 
 	private void checkResetLanguageSettings() {
-		LanguageSettings languageSettings = LanguageSettings.getInstance(deleteTeacherLanguageFragment.getActivity());
-		if (teacherFromToLanguage.getId() == languageSettings.getTeacherLanguageId()){
-			languageSettings.setTeacherId(-1l)
-			.setTeacherLanguageId(-1l) 
-			.setTeacherName("") 
-			.setClassId(-1l) 
-			.setClassTitle("") 
-			.setLessonId(-1l) 
-			.setLessonTitle("") 
-			.setLastLessonPhraseLine(-1) 
-			.commit();
+		if (teacherFromToLanguage.getId() == languageSettings
+				.getTeacherLanguageId()) {
+			languageSettings.setTeacherId(-1l).setTeacherLanguageId(-1l)
+					.setTeacherName("").setClassId(-1l).setClassTitle("")
+					.setLessonId(-1l).setLessonTitle("").setLastLessonPhraseLine(-1)
+					.commit();
 		}
 	}
 
-	@Override
-	protected Boolean doInBackground(Void... params) {
-		deleteProcess();
-		return deleteError || cancel;
-
+	// ILessonMaintenaceCallBack methods - start
+	private void passbackMessage(String message, boolean error) {
+		this.message = this.message + "\n" + message;
+		lessonMaintanceCallBack.passbackMessage(message, error);
 	}
 
-	@Override
-	protected void onProgressUpdate(Integer... progress) {
-		if (deleteTeacherLanguageFragment == null)
-			return;
-		deleteTeacherLanguageFragment.updateProgress(progress[0]);
+	private void publishProgress(int percentComplete, String message) {
+		lessonMaintanceCallBack.passbackPercentComplete(percentComplete, message);
 	}
 
-	@Override
-	protected void onPostExecute(Boolean result) {
-		if (deleteTeacherLanguageFragment == null)
-			return;
-		deleteTeacherLanguageFragment.taskFinished(
-				cancel ? GlobalValues.CANCELLED
-						: (deleteError ? GlobalValues.FINISHED_WITH_ERROR
-								: GlobalValues.FINISHED_OK), errorMsg);
+	private void finishProcess() {
+		int maintenanceStatus = (cancel ? GlobalValues.CANCELLED
+				: (deleteError ? GlobalValues.FINISHED_WITH_ERROR
+						: GlobalValues.FINISHED_OK));
+		languageSettings.setMaintenanceStatus(maintenanceStatus).commit();
+		lessonMaintanceCallBack.completedProcess(maintenanceStatus, message);
 	}
 
-	// call back with error message
-	// Save the error msg for passing back on onPostExecute - and via UI thread
-	private void passbackErrorMessage(String errorMsg) {
-		this.errorMsg = this.errorMsg + "\n" +  errorMsg;
-	}
-
-	 
+	// ILessonMaintenaceCallBack methods - end
 
 	public void cancelTask(boolean cancel) {
 		this.cancel = cancel;
 	}
 
 	// delete stuff and update progress every now and then
+	// percent completes are arbitrarily assigned.
 	private void deleteProcess() {
 		setupDao();
 		// see if language phrases and media may be used in teacher (say in
 		// opposite manner Turkish -> English)
-		getTeacherInfo(teacherFromToLanguage.getTeacherId(), teacherFromToLanguage.getLearningLanguageId(), teacherFromToLanguage.getKnownLanguageId());
+		getTeacherInfo(teacherFromToLanguage.getTeacherId(),
+				teacherFromToLanguage.getLearningLanguageId(),
+				teacherFromToLanguage.getKnownLanguageId());
 		if (deleteError || cancel == true)
 			return;
-		publishProgress(2);
+		publishProgress(2, res.getString(R.string.deleting_lessons_by_class));
 		// get list of classes for this teacher/language
 		// for for each class delete the lesson phrases and lessons
-		classNameList = getClassNames(teacherFromToLanguage.getTeacherId(), teacherFromToLanguage.getId());
+		classNameList = getClassNames(teacherFromToLanguage.getTeacherId(),
+				teacherFromToLanguage.getId());
 		if (classNameList != null) {
 			for (int i = 0; i < classNameList.size(); ++i) {
 				if (deleteError || cancel == true)
@@ -172,17 +160,19 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 		}
 		if (deleteError || cancel == true)
 			return;
-		publishProgress(10);
+		publishProgress(10, res.getString(R.string.deleting_classes));
 		// delete all the classes for that teacher language
-		deleteClassesForTeacher(teacherFromToLanguage.getTeacherId(), teacherFromToLanguage.getId());
+		deleteClassesForTeacher(teacherFromToLanguage.getTeacherId(),
+				teacherFromToLanguage.getId());
 		if (deleteError || cancel == true)
 			return;
-		publishProgress(30);
+		publishProgress(30,res.getString(R.string.deleting_cross_references));
 		// delete the LanguageXrefs
-		deleteLanguageXrefs(teacherFromToLanguage.getTeacherId(), teacherFromToLanguage.getId());
+		deleteLanguageXrefs(teacherFromToLanguage.getTeacherId(),
+				teacherFromToLanguage.getId());
 		if (deleteError || cancel == true)
 			return;
-		publishProgress(40);
+		publishProgress(40, res.getString(R.string.deleting_language_phrases));
 		// if language phrases not used elsewhere delete them and also media files
 		if (dontDeletePhrasesAndMedia)
 			return;
@@ -191,23 +181,27 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 				teacherFromToLanguage.getLearningLanguageId());
 		if (deleteError || cancel == true)
 			return;
-		publishProgress(50);
+		publishProgress(50,res.getString(R.string.deleting_language_phrases));
 		deleteLanguagePhrases(teacherFromToLanguage.getTeacherId(),
 				teacherFromToLanguage.getKnownLanguageId());
 		if (deleteError || cancel == true)
 			return;
-		publishProgress(60);
+		publishProgress(60, res.getString(R.string.deleting_language_media));
 		if (!deleteMediaFiles(teacherLanguage.getLearningLanguageMediaDirectory())) {
 			// display some error that media files not all deleted
-			passbackErrorMessage(res.getString(R.string.media_directory_could_not_be_deleted,teacherLanguage.getLearningLanguageMediaDirectory() ));
+			passbackMessage(res.getString(
+					R.string.media_directory_could_not_be_deleted,
+					teacherLanguage.getLearningLanguageMediaDirectory()), true);
 			deleteError = true;
 		}
 		if (!deleteMediaFiles(teacherLanguage.getKnownLanguageMediaDirectory())) {
-				// display some error that media files not all deleted
-				passbackErrorMessage(res.getString(R.string.media_directory_could_not_be_deleted,teacherLanguage.getKnownLanguageMediaDirectory() ));
-				deleteError = true;
+			// display some error that media files not all deleted
+			passbackMessage(res.getString(
+					R.string.media_directory_could_not_be_deleted,
+					teacherLanguage.getKnownLanguageMediaDirectory()), true);
+			deleteError = true;
 		}
-		publishProgress(80);
+		publishProgress(80, res.getString(R.string.deleting_language_media));
 
 		if (teacherCount > 1)
 			return;
@@ -218,7 +212,7 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 		// language
 		deleteTeacherLanguage(teacherFromToLanguage.getId());
 		deleteTeacher(teacherFromToLanguage.getTeacherId());
-		publishProgress(100);
+		publishProgress(100, "");
 
 	}
 
@@ -228,23 +222,23 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 				.where(
 						LanguageXrefDao.Properties.TeacherId.eq(teacherId),
 						LanguageXrefDao.Properties.TeacherLanguageId
-								.eq(teacherLanguageId))
-				.buildDelete();
+								.eq(teacherLanguageId)).buildDelete();
 		languageXrefDeleteQuery.executeDeleteWithoutDetachingEntities();
 
 	}
 
-	private ArrayList<ClassName> getClassNames(long teacherId, long teacherLanguageId) {
+	private ArrayList<ClassName> getClassNames(long teacherId,
+			long teacherLanguageId) {
 		return (ArrayList<ClassName>) classNameDao
 				.queryBuilder()
 				.where(
 						ClassNameDao.Properties.TeacherId.eq(teacherId),
 						ClassNameDao.Properties.TeacherLanguageId
-								.eq(teacherLanguageId))
-				.list();
+								.eq(teacherLanguageId)).list();
 	}
 
-	private void getTeacherInfo(long teacherId, long learningLanguageId, long knownLanguageId) {
+	private void getTeacherInfo(long teacherId, long learningLanguageId,
+			long knownLanguageId) {
 		Cursor cursor = null;
 		// See if teacher has reversed teaching language (English ->Turkish and
 		// Turkish->English)
@@ -254,16 +248,16 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 				+ TeacherLanguageDao.Properties.LearningLanguageId.columnName
 				+ " = " + knownLanguageId + " and "
 				+ TeacherLanguageDao.Properties.KnownLanguageId.columnName + " = "
-				+ learningLanguageId ;
+				+ learningLanguageId;
 
 		cursor = daoSession.getDatabase().rawQuery(sql, null);
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			// don't delete phrases and media as there are used by another class
 			// from the same teacher
-			if (cursor.getInt(0) > 0){
+			if (cursor.getInt(0) > 0) {
 				dontDeletePhrasesAndMedia = true;
-			return;
+				return;
 			}
 		}
 		cursor.close();
@@ -273,20 +267,18 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 				+ TeacherLanguageDao.Properties.TeacherId.columnName + " = "
 				+ teacherId;
 		cursor = daoSession.getDatabase().rawQuery(sql, null);
-		if (cursor.getCount() > 0){
+		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			teacherCount = cursor.getInt(0);
 		}
 		cursor.close();
 		// get media directories
-		teacherLanguage = teacherLanguageDao
-				.queryBuilder()
-				.where(
-						TeacherLanguageDao.Properties.Id.eq(teacherId)).unique();
+		teacherLanguage = teacherLanguageDao.queryBuilder()
+				.where(TeacherLanguageDao.Properties.Id.eq(teacherId)).unique();
 		if (teacherLanguage == null) {
 			// record not found error should not occur
-			passbackErrorMessage(res
-					.getString(R.string.teacher_language_not_found));
+			passbackMessage(res.getString(R.string.teacher_language_not_found),
+					true);
 			deleteError = true;
 			return;
 		}
@@ -305,10 +297,12 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 
 	private void deleteClassesForTeacher(long teacherId, long teacherLanguageId) {
 		if (classNameDeleteQuery == null) {
-			classNameDeleteQuery = classNameDao.queryBuilder()
-					.where(ClassNameDao.Properties.TeacherId.eq(teacherId),
-							ClassNameDao.Properties.TeacherLanguageId.eq(teacherLanguageId))
-					.buildDelete();
+			classNameDeleteQuery = classNameDao
+					.queryBuilder()
+					.where(
+							ClassNameDao.Properties.TeacherId.eq(teacherId),
+							ClassNameDao.Properties.TeacherLanguageId
+									.eq(teacherLanguageId)).buildDelete();
 		} else {
 			classNameDeleteQuery.setParameter(0, teacherId);
 		}
@@ -378,8 +372,10 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 	private boolean deleteMediaFiles(String directory) {
 		// if directory exists, delete all files in directory then delete the
 		// directory
-		// else if no directory defined then perhaps all media via web so return true also
-		if (directory == null || directory.equals("")) return true;
+		// else if no directory defined then perhaps all media via web so return
+		// true also
+		if (directory == null || directory.equals(""))
+			return true;
 		File dir = new File(
 				Environment
 						.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -393,4 +389,5 @@ public class TeacherLanguageDelete extends AsyncTask<Void, Integer, Boolean> {
 		return dir.delete();
 
 	}
+
 }

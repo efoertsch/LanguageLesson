@@ -22,20 +22,27 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" >
 
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:contentDescription="@string/audio_image"
+            android:src="@drawable/audio_icon" />
+
         <TextView
             android:id="@+id/tvLessonDescription"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_centerInParent="false"
-            android:gravity="center"
+            android:layout_below="@+id/imageView1"
             android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <FrameLayout
-            android:id="@+id/controllerAnchor"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tvLessonDescription" />
     </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/controllerAnchor"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rlAudioView" />
 
 </RelativeLayout>

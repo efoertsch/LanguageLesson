@@ -89,6 +89,22 @@ public class LessonListActivity extends ActionBarActivity implements
 			addFragments();
 		}
 	}
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		reacquireLessonListFragment();
+	}
+	
+	// on orientation change need to re-acquire lessonListFragment (if one exists)
+	// but if first time in it won't exist - which is ok
+	private void reacquireLessonListFragment() {
+		if (onLargeScreen){
+			FragmentManager fm = getSupportFragmentManager();
+			lessonListFragment = (LessonListFragment) fm.findFragmentByTag(MASTER_CONTAINER);
+		}
+		
+	}
 
 	private void validateClassOrLesson() {
 		// make sure lesson still exists (if indeed it was previously set)
@@ -138,29 +154,31 @@ public class LessonListActivity extends ActionBarActivity implements
 		if (onLargeScreen) {
 			fragment = fm.findFragmentByTag(CHILD_CONTAINER);
 			if (fragment != null){
-				ft.attach(fragment).addToBackStack(null);
+//				// already on backstack, don't add
+//				//ft.attach(fragment).addToBackStack(null);
+//				ft.attach(fragment);
 			}
-			// if no fragment found then lesson not yet selected and nothing to add yet
-//			else {
-//				fragment = getLessonFragment();
-//				ft.add(R.id.detailFragmentContainer, fragment, CHILD_CONTAINER);
-//			}
 		}
 		//small screen or large screen something goes in MASTER_CONTAINER	
 		// see if LessonListFragment already exists and if so just add it back
 		fragment = fm.findFragmentByTag(MASTER_CONTAINER);
 		if (fragment != null){
-			ft.attach(fragment).addToBackStack(null) ;
+			// already on backstack so don't add
+			//ft.attach(fragment).addToBackStack(null) ;
+			//ft.attach(fragment);
 		}
 		else {
-			// large screen add lessonList, small screen add lessonFragment
+			// large screen add lessonListFragment, small screen add lessonFragment
 			if (onLargeScreen){
-			  fragment = new LessonListFragment();
+				// hold on to lessonListFragment reference as used elsewhere
+				lessonListFragment = new LessonListFragment();
+			   fragment = lessonListFragment;
+			   ft.replace(R.id.fragmentContainer, fragment, MASTER_CONTAINER).addToBackStack(null);
 			}
 			else {
 				fragment = getLessonFragment();
+				ft.replace(R.id.fragmentContainer, fragment, MASTER_CONTAINER).addToBackStack(null);
 			}
-			ft.add(R.id.fragmentContainer, fragment, MASTER_CONTAINER).addToBackStack(null);
 		}
 		ft.commit();
 	}
@@ -170,6 +188,7 @@ public class LessonListActivity extends ActionBarActivity implements
 	//     If fragment exists and is in detailFragmentContainer and is AudioPlayerFragment or VideoPlayerFragment call stopPlayer() and remove fragment
 	//     else (LessonPhraseFragment) remove fragment
 	// If this not working make sure that mediacontroller controls not on all the time, if so the back keypress doesn't make it to here.
+	// Just popping fragments off backstack and then checking for number of fragments doesn't work. Fragment manager still holds on to fragments
 	@Override
 	public void onBackPressed() {
 		FragmentManager fm = getSupportFragmentManager();
@@ -181,20 +200,32 @@ public class LessonListActivity extends ActionBarActivity implements
 			finish();
 		}
 		else {
+			// on large screen, 
 			// if lessonFragment showing first press of back button will remove the fragment
 			// the next press will finish activity
-			Fragment lessonFragment = (Fragment) fm.findFragmentById( R.id.detailFragmentContainer);
-			if (lessonFragment != null) {
-				fm.beginTransaction().remove(lessonFragment).commit();
+			fm.popBackStackImmediate();
+			if (fm.getBackStackEntryCount() == 0 ){
+				finish();
+				return;
 			}
-			else finish();
+			// still going so lessonListFragment still exists, turn off high light
+			lessonListFragment.turnOffSelectedHightlight();
+//			// if still here, turn off selected lesson highlight
+//			if (lessonListFragment != null){
+//				lessonListFragment.turnOffSelectedHightlight();
+//			}
+//			Fragment lessonFragment = (Fragment) fm.findFragmentById( R.id.detailFragmentContainer);
+//			if (lessonFragment != null) {
+//				fm.beginTransaction().remove(lessonFragment).commit();
+//			}
+//			else finish();
 		}
 		//super.onBackPressed();
 	}
 	
  
 
-	// A lesson must be validate before calling this routine
+	// A lesson must be validat before calling this routine
 	private Fragment getLessonFragment() {
 		return MediaPlayerFragmentFactory.getMediaPlayerFragment(lesson);
 	}
@@ -212,6 +243,7 @@ public class LessonListActivity extends ActionBarActivity implements
 			Intent intent = new Intent(this, LessonPhraseActivity.class);
 			startActivity(intent);
 		} else {
+			loadLesson(languageSettings.getLessonId());
 			startLesson();
 		}
 	}
@@ -227,7 +259,9 @@ public class LessonListActivity extends ActionBarActivity implements
 				: R.id.fragmentContainer;
 		Fragment lessonFragment = (Fragment) fm.findFragmentById(screenId);
 		if (lessonFragment != null) {
-			ft.remove(lessonFragment) ;
+			//ft.remove(lessonFragment) ;
+			fm.popBackStackImmediate();
+			 
 		}
 		lessonFragment = getLessonFragment();
 		ft.add(screenId, lessonFragment, onLargeScreen? CHILD_CONTAINER : MASTER_CONTAINER).addToBackStack(null).commit();
@@ -316,6 +350,12 @@ public class LessonListActivity extends ActionBarActivity implements
 				// tell LessonListFragment to start to list the new set of lessons
 				// and remove the lessonFragment until lesson selected in list
 				if (languageSettings.getClassId() != -1) {
+					// if very first time in after initial load of first class 
+					// lessonListFragment won't have been created yet
+					if (lessonListFragment == null){
+						addFragments();
+					}
+					lessonListFragment.turnOffSelectedHightlight();
 					lessonListFragment.displayLessonList();
 					removeLessonFragment();
 				} else {

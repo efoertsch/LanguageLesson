@@ -36,12 +36,10 @@ public abstract class MasterActivity extends ActionBarActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(getLayoutResId());
-		// do whatever needed
-//		actionBar = getSupportActionBar();
-//		actionBar.setTitle(getResources().getString(R.string.app_name));
-//		actionBar.setHomeButtonEnabled(true);
-//		// ff0000ff solid bluse
-//		actionBar.setBackgroundDrawable(new ColorDrawable(0xff0000ff));
+		// do whatever needed for action bar https://developer.android.com/guide/topics/ui/actionbar.html#SplitBar
+ 		actionBar = getSupportActionBar();
+ 		actionBar.setDisplayHomeAsUpEnabled(true);
+
 		
 		FragmentManager fm = getSupportFragmentManager();
 		Fragment fragment = fm.findFragmentById(R.id.fragmentContainer);

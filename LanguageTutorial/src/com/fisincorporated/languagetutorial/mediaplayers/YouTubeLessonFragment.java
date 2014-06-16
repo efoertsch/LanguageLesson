@@ -46,7 +46,7 @@ public class YouTubeLessonFragment  extends YouTubePlayerSupportFragment impleme
 	}
 
    private void initialize() {
-       initialize(getActivity().getResources().getString(R.string.YoutubeKeyTest), new OnInitializedListener()  {
+       initialize(getActivity().getResources().getString(R.string.YoutubeKey), new OnInitializedListener()  {
            @Override
            public void onInitializationFailure(Provider arg0, YouTubeInitializationResult arg1) { 
          	  Log.i(TAG, " onInitializationFailure");

@@ -11,7 +11,9 @@
     <dimen name="ts1sp">1sp</dimen>
     <dimen name="ts2sp">2sp</dimen>
     <dimen name="ts3sp">3sp</dimen>
+    <dimen name="ts5sp">5sp</dimen>
     <dimen name="ts10sp">10sp</dimen>
+    <dimen name="ts15sp">15sp</dimen>
     <dimen name="ts30sp">30sp</dimen>
     <dimen name="ts40sp">40sp</dimen>
     <dimen name="ts50sp">50sp</dimen>
