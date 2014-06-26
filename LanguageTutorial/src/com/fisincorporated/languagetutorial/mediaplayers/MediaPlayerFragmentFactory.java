@@ -1,19 +1,17 @@
 package com.fisincorporated.languagetutorial.mediaplayers;
 
+import android.database.Cursor;
+import android.support.v4.app.Fragment;
+
 import com.fisincorporated.languagetutorial.GlobalValues;
 import com.fisincorporated.languagetutorial.LanguageApplication;
 import com.fisincorporated.languagetutorial.LessonPhraseFragment;
-import com.fisincorporated.languagetutorial.db.DaoMaster;
 import com.fisincorporated.languagetutorial.db.DaoSession;
 import com.fisincorporated.languagetutorial.db.LanguagePhraseDao;
 import com.fisincorporated.languagetutorial.db.LanguageXrefDao;
 import com.fisincorporated.languagetutorial.db.Lesson;
-import com.fisincorporated.languagetutorial.db.LessonDao;
 import com.fisincorporated.languagetutorial.db.LessonPhraseDao;
 import com.fisincorporated.languagetutorial.db.TeacherLanguageDao;
-
-import android.database.Cursor;
-import android.support.v4.app.Fragment;
 
 public class MediaPlayerFragmentFactory {
 

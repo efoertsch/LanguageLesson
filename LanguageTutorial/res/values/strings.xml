@@ -124,7 +124,7 @@
     <string name="load_japanese_lesson">Load Japanese demo lesson</string>
     <string name="looks_like_an_error_loading_lesson">Looks like there was an error loading the lesson. Has a language file been loaded? And loaded successfully?</string>
     <string name="known_language_media_from">Known language media from %1$s. \n</string>
-    <string name="media_files_directory">Media files must be stored in directory</string>
+    <string name="media_files_directory">Media files must be stored in directory </string>
     <string name="media_directory_not_a_directory">%1$s to be used to store audio/video media exists but is not a directory. Either delete this before loading language file or change the media directory name in the language file. </string>
     <string name="media_directory_could_not_be_created">The media directory %1$s was not successfully created. You may need to create this directory manually. </string>
     <string name="media_directory_could_not_be_deleted">The media directory %1$s was not successfully deleted. You may need to delete this directory manually. </string>
@@ -146,6 +146,8 @@
     <string name="no_url_entered_loading_cancelled">No URL entered. Loading cancelled.</string>
     <string name="no_values_found">No values found</string>
     <string name="not_yet_implemented">Not Yet Implemented</string>
+    <string name="no_teacher_language_class_or_lesson_selected">Not teacher, language, class, and/or lesson selected. Nothing to save.</string>
+    <string name="no_class_selected_do_you_need_to_load_lessons">No class selected. Do you need to load lessons?</string>
     <string name="number">number</string>
     <string name="ok">OK</string>
     <string name="one_or_other_values_must_be_zero">One or the other values of \'%1$s\' or \'%2$s\' must be zero.</string>

@@ -122,6 +122,8 @@ public class LessonSelectionDialog extends DialogFragment {
 	private int dialogTitle = -1;
 	private int positiveButton = -1;
 	private int negativeButton = -1;
+	
+	private AlertDialog lessonSelectionDialog = null;
 
 	public final static String LESSON_DIALOG_RESPONSE = "com.fisincorporated.languagetutorial.lesson.dialog.response";
 
@@ -330,6 +332,7 @@ public class LessonSelectionDialog extends DialogFragment {
 					}
 				});
 
+		lessonSelectionDialog = (AlertDialog) builder.create();
 		setUpTeacherDropdown();
 		if (dialogFunction.equals(LessonSelectionDialog.CLASS_LESSON_SELECT)) {
 			// already being done in setUpTeacherLanguageDropDown so don't repeat
@@ -342,8 +345,10 @@ public class LessonSelectionDialog extends DialogFragment {
 			classId = -1l;
 			lessonId = -1l;
 		}
+		
 		//v.invalidate();
-		return builder.create();
+		
+		return lessonSelectionDialog;
 	}
 	
 	 
@@ -571,7 +576,12 @@ public class LessonSelectionDialog extends DialogFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		// spnrTeacher.setSelection(0);
+		// when first installed if user gets here and nothing in database disable save
+		if (teacherList.size() == 0) {
+			if (lessonSelectionDialog != null){
+				lessonSelectionDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+			}
+		}
 	}
 
 	// following methods are duplicated in DeleteTeacherLanguageDialog.
@@ -706,7 +716,15 @@ public class LessonSelectionDialog extends DialogFragment {
 			bundle.putParcelable(GlobalValues.TEACHER_FROM_TO_LANGUAGE,
 					teacherFromToLanguage);
 		} else {
-			saveLanguagePreferences();
+			
+			// make sure at least something selected (especially if no lessons loaded to device yet)
+			if (selectedTeacher != null ){
+				saveLanguagePreferences();
+			}
+			else {
+				// shouldn't get here but if you do
+				Toast.makeText(getActivity(), R.string.no_teacher_language_class_or_lesson_selected,Toast.LENGTH_LONG).show();
+			}
 			bundle = null;
 		}
 		return bundle;

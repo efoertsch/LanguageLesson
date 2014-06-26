@@ -1,6 +1,7 @@
 package com.fisincorporated.languagetutorial;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Date;
 
@@ -17,6 +18,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnPreparedListener;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -224,7 +226,8 @@ public class LanguagePhrasePlayer extends HandlerThread {
 					mediaPlayer.reset();
 				}
 				//mediaPlayer.setDataSource("file:///" + languageMediaDirectory + "/"	+ audioFile);
-				mediaPlayer.setDataSource("file:///" + file.getAbsolutePath() );
+				setDataSourcePerVersion( file);
+				
 				// once prepared the onPreparedListener will be called and
 				// logic in listener will play but set flag here (as prepare might
 				// take a bit and don't want to process another request
@@ -252,6 +255,19 @@ public class LanguagePhrasePlayer extends HandlerThread {
 		}
 	}
 	
+	private void setDataSourcePerVersion( File file) throws IllegalArgumentException, SecurityException, IllegalStateException, IOException{
+		if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.KITKAT) {
+			mediaPlayer.setDataSource("file:///" + file.getAbsolutePath() );
+		}
+		else {
+			// earlier version of Mediaplayer do not have authorization to open file in /data/data/....
+			// but it can read file based on file descriptor so...
+			mediaPlayer.setDataSource(new FileInputStream(file).getFD());
+		}
+		
+		
+	}
+
 	private File findFile(String languageMediaDirectory, String audioFile){
 		String modifiedName = audioFile;
 		File file = new File(languageMediaDirectory, modifiedName);

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/load_language_file"
-        android:showAsAction="ifRoom|withText"
+        app:showAsAction="ifRoom|withText"
         android:title="@string/load_language_file">
         <menu>
             <group android:id="@+id/load_file_options" >
@@ -18,22 +19,23 @@
     </item>
     <item
         android:id="@+id/delete_teacher_language_class"
-        android:showAsAction="ifRoom|withText"
+        app:showAsAction="ifRoom|withText"
         android:title="@string/delete_teacher_language"/>
     <item
         android:id="@+id/cancel_task"
-        android:showAsAction="ifRoom|withText"
+        app:showAsAction="ifRoom|withText"
         android:title="@string/cancel_task"
         android:visible="false"/>
     <item
         android:id="@+id/reset_background_task"
-        android:showAsAction="ifRoom|withText"
+        app:showAsAction="ifRoom|withText"
         android:title="@string/reset"
         android:visible="false"/>
-    <item
+<!--  uncomment if needed for development testing
+       <item
         android:id="@+id/backup_restore_language_database"
-        android:showAsAction="ifRoom|withText"
+        app:showAsAction="ifRoom|withText"
         android:title="@string/backup_restore_database"
         android:visible="true"/>
-
+-->
 </menu>

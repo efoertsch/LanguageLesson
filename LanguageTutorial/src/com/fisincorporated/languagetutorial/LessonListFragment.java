@@ -137,7 +137,9 @@ public class LessonListFragment extends MasterFragment {
 	// selected
 	public void turnOffSelectedHightlight() {
 			selectedLessonPosition = -1;
-			lessonListAdapter.notifyDataSetChanged();
+			if (lessonListAdapter != null){
+				lessonListAdapter.notifyDataSetChanged();
+			}
 	
 	}
 

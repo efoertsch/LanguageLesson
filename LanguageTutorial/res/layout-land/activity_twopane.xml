@@ -3,12 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:baselineAligned="false">
+    android:baselineAligned="false" 
+   >
   <FrameLayout
     android:id="@+id/fragmentContainer"
     android:layout_width="0dp"
     android:layout_height="match_parent"
     android:layout_weight="1"
+     
     />
   <include layout="@layout/divider_horizontal" />
   <FrameLayout

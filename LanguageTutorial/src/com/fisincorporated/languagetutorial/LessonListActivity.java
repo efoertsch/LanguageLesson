@@ -3,7 +3,6 @@ package com.fisincorporated.languagetutorial;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -37,28 +36,26 @@ public class LessonListActivity extends ActionBarActivity implements
 
 	// private static final String LESSON_V_OR_A = "lessonVorA";
 	// private static final String LESSON_TEXT = "lessonText";
-	//private static final String LESSON_FRAGMENT = "LessonFragment";
+	// private static final String LESSON_FRAGMENT = "LessonFragment";
 	private static final String MASTER_CONTAINER = "MasterContainer";
-	private static final String CHILD_CONTAINER ="ChildContainer";
+	private static final String CHILD_CONTAINER = "ChildContainer";
 	private static LanguageSettings languageSettings;
 	private LessonSelectionDialog lessonSelectionDialog;
-	//private LessonPhraseFragment lessonPhraseFragment = null;
+	// private LessonPhraseFragment lessonPhraseFragment = null;
 	private LessonListFragment lessonListFragment;
 
-	private ActionBar actionBar;
 	private boolean onLargeScreen = false;
 
 	// private DaoMaster daoMaster;
 	private DaoSession daoSession;
-	//private LessonDao lessonDao;
+	// private LessonDao lessonDao;
 	private Lesson lesson;
 	private Long lessonId;
 	private ClassName className;
 	private Long classId;
 
-
-	//private Long lessonId = -1l;
-	//private Lesson lesson = null;
+	// private Long lessonId = -1l;
+	// private Lesson lesson = null;
 
 	public LessonListActivity() {
 	}
@@ -66,174 +63,140 @@ public class LessonListActivity extends ActionBarActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_masterdetail);
-		// do whatever needed
-//		actionBar = getSupportActionBar();
-//		actionBar.setTitle(getResources().getString(R.string.app_name));
-//		// ff0000ff solid blue
-//		actionBar.setBackgroundDrawable(new ColorDrawable(0xff0000ff));
 
 		// see if large or small screen (via if detailFragmentContainer exists in
 		// layout)
 		onLargeScreen = (findViewById(R.id.detailFragmentContainer) != null) ? true
 				: false;
 		languageSettings = LanguageSettings.getInstance(this);
-	 	
+
 		validateClassOrLesson();
 		// See if class or lesson selected before displaying fragment
-		if (onLargeScreen &&  classId == -1
-					|| !onLargeScreen &&  lessonId == -1) {
+		if (onLargeScreen && classId == -1 || !onLargeScreen && lessonId == -1) {
 			displayLessonSelectionDialog();
 		} else {
 			// either displaying the lesson list (getClassId <> -1) or lesson
 			// (getLessonId <> -1)
-			addFragments();
+			// only do if not orientation change (I think)
+			// http://stackoverflow.com/questions/8474104/android-fragment-lifecycle-over-orientation-changes
+			if (savedInstanceState == null) {
+				addFragments();
+			}
 		}
 	}
-	
+
 	@Override
-	public void onResume(){
+	public void onResume() {
 		super.onResume();
 		reacquireLessonListFragment();
 	}
-	
-	// on orientation change need to re-acquire lessonListFragment (if one exists)
+
+	// on orientation change need to re-acquire lessonListFragment (if one
+	// exists)
 	// but if first time in it won't exist - which is ok
 	private void reacquireLessonListFragment() {
-		if (onLargeScreen){
+		if (onLargeScreen) {
 			FragmentManager fm = getSupportFragmentManager();
-			lessonListFragment = (LessonListFragment) fm.findFragmentByTag(MASTER_CONTAINER);
+			lessonListFragment = (LessonListFragment) fm
+					.findFragmentByTag(MASTER_CONTAINER);
 		}
-		
+
 	}
 
 	private void validateClassOrLesson() {
 		// make sure lesson still exists (if indeed it was previously set)
-		classId =  languageSettings.getClassId();
+		classId = languageSettings.getClassId();
 		lessonId = languageSettings.getLessonId();
-		if (classId != -1){
+		if (classId != -1) {
 			loadClassName(classId);
-			if (className == null){
+			if (className == null) {
 				resetLanguageSettings();
 				lessonId = -1l;
 				lesson = null;
 				return;
 			}
 		}
-		if ((!onLargeScreen) &&  lessonId != -1){
+		if ((!onLargeScreen) && lessonId != -1) {
 			loadLesson(lessonId);
-			if (lesson == null){
-			// lessons must have been deleted so reset
+			if (lesson == null) {
+				// lessons must have been deleted so reset
 				resetLanguageSettings();
 				lessonId = -1l;
 			}
 		}
 	}
 
-
 	private void resetLanguageSettings() {
-		languageSettings.setTeacherId(-1l)
-		.setTeacherLanguageId(-1l) 
-		.setTeacherName("")
-		.setClassId(-1l) 
-		.setClassTitle("") 
-		.setLessonId(-1l) 
-		.setLessonTitle("") 
-		.setLastLessonPhraseLine(-1) 
-		.commit();
-		
+		languageSettings.setTeacherId(-1l).setTeacherLanguageId(-1l)
+				.setTeacherName("").setClassId(-1l).setClassTitle("")
+				.setLessonId(-1l).setLessonTitle("").setLastLessonPhraseLine(-1)
+				.commit();
+
 	}
 
 	// If a detail fragment container exists must be on a larger screen so will
 	// have lesson list on left (in fragmentContainer) and
 	// lesson on right (in detailFragmentContainer)
 	// on smaller screen you will have lesson in fragmentContainer
+	// This is strictly for use via onCreate (and no orientation change)
 	private void addFragments() {
 		FragmentManager fm = getSupportFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
-		Fragment fragment;
 		if (onLargeScreen) {
-			fragment = fm.findFragmentByTag(CHILD_CONTAINER);
-			if (fragment != null){
-//				// already on backstack, don't add
-//				//ft.attach(fragment).addToBackStack(null);
-//				ft.attach(fragment);
-			}
-		}
-		//small screen or large screen something goes in MASTER_CONTAINER	
-		// see if LessonListFragment already exists and if so just add it back
-		fragment = fm.findFragmentByTag(MASTER_CONTAINER);
-		if (fragment != null){
-			// already on backstack so don't add
-			//ft.attach(fragment).addToBackStack(null) ;
-			//ft.attach(fragment);
-		}
-		else {
-			// large screen add lessonListFragment, small screen add lessonFragment
-			if (onLargeScreen){
-				// hold on to lessonListFragment reference as used elsewhere
-				lessonListFragment = new LessonListFragment();
-			   fragment = lessonListFragment;
-			   ft.replace(R.id.fragmentContainer, fragment, MASTER_CONTAINER).addToBackStack(null);
-			}
-			else {
-				fragment = getLessonFragment();
-				ft.replace(R.id.fragmentContainer, fragment, MASTER_CONTAINER).addToBackStack(null);
-			}
+			lessonListFragment = new LessonListFragment();
+			ft.add(R.id.fragmentContainer, lessonListFragment, MASTER_CONTAINER)
+					.addToBackStack(null);
+		} else { // else small screen
+			ft.add(R.id.fragmentContainer, getLessonFragment(), MASTER_CONTAINER)
+					.addToBackStack(null);
 		}
 		ft.commit();
 	}
-	
+
 	// If on small device finish this activity
-	// If on large device, 
-	//     If fragment exists and is in detailFragmentContainer and is AudioPlayerFragment or VideoPlayerFragment call stopPlayer() and remove fragment
-	//     else (LessonPhraseFragment) remove fragment
-	// If this not working make sure that mediacontroller controls not on all the time, if so the back keypress doesn't make it to here.
-	// Just popping fragments off backstack and then checking for number of fragments doesn't work. Fragment manager still holds on to fragments
+	// If on large device,
+	// If fragment exists and is in detailFragmentContainer and is
+	// AudioPlayerFragment or VideoPlayerFragment call stopPlayer() and remove
+	// fragment
+	// else (LessonPhraseFragment) remove fragment
+	// If this not working make sure that mediacontroller controls not on all the
+	// time, if so the back keypress doesn't make it to here.
+	// Just popping fragments off backstack and then checking for number of
+	// fragments doesn't work. Fragment manager still holds on to fragments
 	@Override
 	public void onBackPressed() {
 		FragmentManager fm = getSupportFragmentManager();
-		if (!onLargeScreen){
-			Fragment lessonFragment = (Fragment) fm.findFragmentById( R.id.fragmentContainer);
+		if (!onLargeScreen) {
+			Fragment lessonFragment = (Fragment) fm
+					.findFragmentById(R.id.fragmentContainer);
 			if (lessonFragment != null) {
 				fm.beginTransaction().remove(lessonFragment).commit();
 			}
 			finish();
-		}
-		else {
-			// on large screen, 
-			// if lessonFragment showing first press of back button will remove the fragment
+		} else {
+			// on large screen,
+			// if lessonFragment showing first press of back button will remove the
+			// fragment
 			// the next press will finish activity
 			fm.popBackStackImmediate();
-			if (fm.getBackStackEntryCount() == 0 ){
+			if (fm.getBackStackEntryCount() == 0) {
 				finish();
 				return;
 			}
 			// still going so lessonListFragment still exists, turn off high light
 			lessonListFragment.turnOffSelectedHightlight();
-//			// if still here, turn off selected lesson highlight
-//			if (lessonListFragment != null){
-//				lessonListFragment.turnOffSelectedHightlight();
-//			}
-//			Fragment lessonFragment = (Fragment) fm.findFragmentById( R.id.detailFragmentContainer);
-//			if (lessonFragment != null) {
-//				fm.beginTransaction().remove(lessonFragment).commit();
-//			}
-//			else finish();
 		}
-		//super.onBackPressed();
 	}
-	
- 
 
 	// A lesson must be validat before calling this routine
 	private Fragment getLessonFragment() {
 		return MediaPlayerFragmentFactory.getMediaPlayerFragment(lesson);
 	}
 
-//	@Override
-//	public void onSaveInstanceState(Bundle savedInstanceState) {
-//		super.onSaveInstanceState(savedInstanceState);
-//	}
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+	}
 
 	// Don't care about bundle, if this is called then display lesson
 	@Override
@@ -259,13 +222,15 @@ public class LessonListActivity extends ActionBarActivity implements
 				: R.id.fragmentContainer;
 		Fragment lessonFragment = (Fragment) fm.findFragmentById(screenId);
 		if (lessonFragment != null) {
-			//ft.remove(lessonFragment) ;
+			// ft.remove(lessonFragment) ;
 			fm.popBackStackImmediate();
-			 
+
 		}
 		lessonFragment = getLessonFragment();
-		ft.add(screenId, lessonFragment, onLargeScreen? CHILD_CONTAINER : MASTER_CONTAINER).addToBackStack(null).commit();
-		 
+		ft.add(screenId, lessonFragment,
+				onLargeScreen ? CHILD_CONTAINER : MASTER_CONTAINER)
+				.addToBackStack(null).commit();
+
 	}
 
 	// Add the menu - Will add to any menu items added by parent activity
@@ -289,9 +254,10 @@ public class LessonListActivity extends ActionBarActivity implements
 	private void displayLessonSelectionDialog() {
 		// note that 'requestCode' is doing double duty here
 		pauseMedia();
-		int requestCode = onLargeScreen ? LessonSelectionDialog.SELECT_TO_CLASS : LessonSelectionDialog.SELECT_TO_LESSON; 
-		lessonSelectionDialog = LessonSelectionDialog
-				.newInstance(LessonSelectionDialog.CLASS_LESSON_SELECT, requestCode);
+		int requestCode = onLargeScreen ? LessonSelectionDialog.SELECT_TO_CLASS
+				: LessonSelectionDialog.SELECT_TO_LESSON;
+		lessonSelectionDialog = LessonSelectionDialog.newInstance(
+				LessonSelectionDialog.CLASS_LESSON_SELECT, requestCode);
 		lessonSelectionDialog.setOnDialogResultListener(this, requestCode);
 		lessonSelectionDialog.show(this.getSupportFragmentManager(),
 				"lessonSelectionDialog");
@@ -304,20 +270,28 @@ public class LessonListActivity extends ActionBarActivity implements
 				: R.id.fragmentContainer;
 		Fragment lessonFragment = (Fragment) fm.findFragmentById(screenId);
 		if (lessonFragment != null) {
-			if (lessonFragment instanceof IPauseMedia){
-				((IPauseMedia)lessonFragment).pauseMedia();
+			if (lessonFragment instanceof IPauseMedia) {
+				((IPauseMedia) lessonFragment).pauseMedia();
 			}
 		}
 	}
 
 	public void onDialogResult(int requestCode, int resultCode,
 			int buttonPressed, Bundle bundle) {
-		if (resultCode != Activity.RESULT_OK)
-			return;
+		// can only get cancel if no lessons loaded at all, so handle
+
+		// ---------------------------------------------------------------------------------------------
 		// If SELECT_TO_LESSON then on small screen and you selected a particular
 		// lesson
 		if (requestCode == LessonSelectionDialog.SELECT_TO_LESSON) {
 			lessonId = languageSettings.getLessonId();
+			if (resultCode != Activity.RESULT_OK && lessonId == -1) {
+				Toast.makeText(this,
+						R.string.no_class_selected_do_you_need_to_load_lessons,
+						Toast.LENGTH_LONG).show();
+				finish();
+				return;
+			}
 			if (buttonPressed == DialogInterface.BUTTON_POSITIVE) {
 				// tell LessonPhraseFragment/MediaPlayerFragment to start the new
 				// lesson saved in shared preferences
@@ -325,10 +299,12 @@ public class LessonListActivity extends ActionBarActivity implements
 					// display appropriate lessonFragment
 					loadLesson(lessonId);
 					startLesson();
+					return;
 				} else {
 					Toast.makeText(this,
 							R.string.no_lesson_selected_use_menu_to_select,
 							Toast.LENGTH_LONG).show();
+					return;
 				}
 
 			} else if (buttonPressed == DialogInterface.BUTTON_NEGATIVE) {
@@ -337,45 +313,66 @@ public class LessonListActivity extends ActionBarActivity implements
 					return;
 				else {
 					Toast.makeText(this,
-							R.string.no_lesson_selected_use_menu_to_select,
+							R.string.no_class_selected_do_you_need_to_load_lessons,
 							Toast.LENGTH_LONG).show();
+					finish();
 					return;
 				}
 			}
 		}
+		// ---------------------------------------------------------------------------------------------
 		// here if on larger screen, LessonListFragment displayed and new set of
 		// lessons displayed
 		if (requestCode == LessonSelectionDialog.SELECT_TO_CLASS) {
+			if (resultCode != Activity.RESULT_OK
+					&& languageSettings.getClassId() == -1) {
+				Toast.makeText(this,
+						R.string.no_class_selected_do_you_need_to_load_lessons,
+						Toast.LENGTH_LONG).show();
+				finish();
+				return;
+			}
 			if (buttonPressed == DialogInterface.BUTTON_POSITIVE) {
 				// tell LessonListFragment to start to list the new set of lessons
 				// and remove the lessonFragment until lesson selected in list
 				if (languageSettings.getClassId() != -1) {
-					// if very first time in after initial load of first class 
+					// if very first time in after initial load of first class
 					// lessonListFragment won't have been created yet
-					if (lessonListFragment == null){
+					if (lessonListFragment == null) {
 						addFragments();
+					} else {
+						lessonListFragment.turnOffSelectedHightlight();
+						lessonListFragment.displayLessonList();
+						removeLessonFragment();
+						return;
 					}
-					lessonListFragment.turnOffSelectedHightlight();
-					lessonListFragment.displayLessonList();
-					removeLessonFragment();
 				} else {
 					Toast.makeText(this,
 							R.string.no_class_selected_use_menu_to_select,
 							Toast.LENGTH_LONG).show();
+					return;
 				}
 			} else if (buttonPressed == DialogInterface.BUTTON_NEGATIVE) {
 				// User cancelled so see if already on lesson and if so stay on it
 				if (-1 != languageSettings.getLessonId())
 					return;
-				else
+				else {
+					// Toast.makeText(this,
+					// R.string.no_class_selected_use_menu_to_select,
+					// Toast.LENGTH_LONG).show();
+
 					Toast.makeText(this,
-							R.string.no_class_selected_use_menu_to_select,
+							R.string.no_class_selected_do_you_need_to_load_lessons,
 							Toast.LENGTH_LONG).show();
+					finish();
+					return;
+				}
 			}
 		}
 	}
 
-	// Remove LessonPhraseFragment or Audio/VideoPlayerFragment until lesson selected
+	// Remove LessonPhraseFragment or Audio/VideoPlayerFragment until lesson
+	// selected
 	private void removeLessonFragment() {
 		FragmentManager fm = getSupportFragmentManager();
 		Fragment fragment = (Fragment) fm
@@ -392,7 +389,8 @@ public class LessonListActivity extends ActionBarActivity implements
 		supportInvalidateOptionsMenu();
 	}
 
-	// Use this both to see if lesson still exists (the teacher/language may have been deleted)
+	// Use this both to see if lesson still exists (the teacher/language may have
+	// been deleted)
 	private void loadLesson(Long lessonId) {
 		lesson = null;
 		if (lessonId != null && lessonId > -1) {
@@ -401,8 +399,9 @@ public class LessonListActivity extends ActionBarActivity implements
 			lesson = lessonDao.load(lessonId);
 		}
 	}
-	
-// Use this both to see if lesson still exists (the teacher/language may have been deleted)
+
+	// Use this both to see if lesson still exists (the teacher/language may have
+	// been deleted)
 	private void loadClassName(Long classId) {
 		className = null;
 		if (classId != null && classId > -1) {
@@ -411,14 +410,5 @@ public class LessonListActivity extends ActionBarActivity implements
 			className = classNameDao.load(classId);
 		}
 	}
-	
- 
-			
 
-		
-		
 }
-
-	
-
-

@@ -412,7 +412,7 @@ public class LanguageMaintenanceService extends IntentService implements
 		File mediaFileDirectory;
 		// String tempZipFile = getDownloadDirectory() + File.separator
 		// + "LanguageLesson_temp.zip";
-		String targetDirectory = getDownloadDirectory() + File.separator
+		String targetDirectory = getMediaDirectory() + File.separator
 				+ mediaDirectory;
 		// copy the zip file to the download directory
 		// then unzip from there to the media directory
@@ -494,7 +494,7 @@ public class LanguageMaintenanceService extends IntentService implements
 	}
 
 	private File createMediaDirectory(String directory) {
-		File sd = getDownloadDirectory();
+		File sd = getMediaDirectory();
 		if (!sd.exists()) {
 			if ( sd.mkdirs() || sd.isDirectory()) {
 				// directory is created;
@@ -523,9 +523,27 @@ public class LanguageMaintenanceService extends IntentService implements
 		return fileDirectory;
 	}
 
-	private File getDownloadDirectory() {
-		return Environment
-				.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+	// first see if the mediaDirectory (used for the audio/video files) has already been created
+	// if so use it.
+	// If not then determine whether there is more internal or external storage
+	// and store the media there.
+	// Hmmm. KISS. Just return internal storage directory
+	private File getMediaDirectory() {
+		File mediaDirectoryFile = null;
+		String mediaDirectory = languageSettings.getMediaDirectory();
+		if (!mediaDirectory.equals("")){
+			return new File(mediaDirectory);
+		}
+		mediaDirectoryFile = getFilesDir();
+//		if (FileUtil.getInternalAvailableSpaceInBytes(this)>= FileUtil.getExternalAvailableSpaceInBytes()){
+//			mediaDirectoryFile =  Environment.getDataDirectory();
+//		}
+//		else {
+//			mediaDirectoryFile = this.getExternalFilesDir(null);
+//		}
+		languageSettings.setMediaDirectory(mediaDirectoryFile.getPath()).commit();
+		return mediaDirectoryFile;
+		
 	}
 	
 	// all the delete logic

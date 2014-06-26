@@ -144,7 +144,6 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 
 	// Add the menu - Will add to any menu items added by parent activity
 	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
 		// Add the menu
 		getMenuInflater().inflate(R.menu.language_db_options, menu);
 		myMenu = menu;
@@ -189,10 +188,10 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 					res.getString(R.string.do_you_want_to_cancel_current_operation),
 					CANCEL_OP, R.string.cancel, R.string.continuex, -1);
 			return true;
-		case R.id.backup_restore_language_database:
-			Intent intent = new Intent(this, BackupRestoreActivity.class);
-			startActivity(intent);
-			return true;
+//		case R.id.backup_restore_language_database:
+//			Intent intent = new Intent(this, BackupRestoreActivity.class);
+//			startActivity(intent);
+//			return true;
 		default:
 			// pass up to superclass
 			return super.onOptionsItemSelected(item);
@@ -293,6 +292,7 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 		// Find the directory for the SD Card using the API
 		// *Don't* hardcode "/sdcard"
 		String filename = loadFileDevice;
+		// this is OK for pre 4.4 
 		File sdcard = Environment
 				.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 		// Get the text file
@@ -354,6 +354,7 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 
 	}
 
+	// For 'manual load'
 	// get details to confirm this is file to load
 	// must read a Teacher and TeacherLanguage line to get details, if not the
 	// first 2 lines of file
@@ -385,7 +386,7 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 				sb.append(res.getText(R.string.media_files_directory) + ":"
 						+ knownLanguageMediaDirectory);
 			}
-			// if no learning media directory defined either and error or all the
+			// if no learning media directory defined either an error or all the
 			// media needs to be read from some website (eg. Youtube)
 			else {
 				sb.append(res.getText(R.string.no_learning_media_directory_defined)
@@ -415,11 +416,13 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 		return success;
 	}
 
+	// TODO - refactor along with similar logic in LanguageMaintenanceService.getMediaDirectory()
 	private boolean createMediaDirectory(String languageMediaDirectory) {
 		boolean success = true;
 		// see if directory exists
-		File dir = new File(Environment.getExternalStorageDirectory() + "/"
-				+ languageMediaDirectory);
+//		File dir = new File(Environment.getExternalStorageDirectory() + "/"
+//				+ languageMediaDirectory);
+		File dir = new File( getFilesDir() + "/"	+ languageMediaDirectory); 
 		if (dir.exists() && !dir.isDirectory()) {
 			// trouble - name exists but is not a directory.
 			// display error, and exit
@@ -435,6 +438,9 @@ public class LanguageMaintenanceActivity extends MasterActivity implements
 				showErrorDialog(res.getString(
 						R.string.media_directory_could_not_be_created,
 						languageMediaDirectory));
+			}
+			else {
+				languageSettings.setMediaDirectory(getFilesDir().getPath()).commit();
 			}
 		}
 		return success;

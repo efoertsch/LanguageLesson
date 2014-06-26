@@ -377,9 +377,7 @@ public class LanguageLessonDeleter {
 		if (directory == null || directory.equals(""))
 			return true;
 		File dir = new File(
-				Environment
-						.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-						+ "/" + directory);
+				languageSettings.getMediaDirectory() + "/" + directory);
 		if (dir.isDirectory()) {
 			for (File f : dir.listFiles()) {
 				f.delete();

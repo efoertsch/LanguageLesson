@@ -61,6 +61,7 @@ public class LanguageSettings {
 	private static final String MAINTENANCE_TYPE = "MAINTENANCE_TYPE";
 	private static final String MAINTENANCE_STATUS = "MAINTENANCE_STATUS";
 	private static final String MAINTENANCE_DETAILS = "MAINTENANCE_DETAILS";
+	private static final String MEDIA_DIRECTORY = "MediaDirectory";
 
 	public static LanguageSettings getInstance(Context context) {
 		if (languageSettings == null) {
@@ -438,6 +439,17 @@ public class LanguageSettings {
 			textSize =  new TextView(sContext).getTextSize();
 		}
 		return textSize;
+	}
+	
+	public String getMediaDirectory() {
+		return sPrefs.getString(MEDIA_DIRECTORY, "");
+	}
+
+	public LanguageSettings setMediaDirectory(String value) {
+		if (value == null)
+			value = "";
+		editor.putString(MEDIA_DIRECTORY, value);
+		return this;
 	}
 
 	

@@ -3,6 +3,7 @@ package com.fisincorporated.languagetutorial.mediaplayers;
 import java.io.File;
 import java.io.IOException;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.media.AudioManager;
@@ -28,6 +29,7 @@ import android.widget.Toast;
 
 import com.fisincorporated.languagetutorial.R;
 import com.fisincorporated.languagetutorial.interfaces.IPauseMedia;
+import com.fisincorporated.languagetutorial.utility.LanguageSettings;
 
 // see http://stackoverflow.com/questions/2961749/mediacontroller-with-mediaplayer
 //, OnAudioFocusChangeListener 
@@ -64,6 +66,8 @@ public abstract class AbstractMediaPlayerFragment extends Fragment implements
 	FrameLayout anchorView;
 	boolean playerPaused = false;
 	int currentPosition = 0;
+	LanguageSettings languageSettings;
+	
 
 	/**
 	 * The media file should either be if web based http://... or https://... if
@@ -87,6 +91,7 @@ public abstract class AbstractMediaPlayerFragment extends Fragment implements
 		setRetainInstance(true);
 		lookForArguments(savedInstanceState);
 		res = getResources();
+		
 	}
 
 	// Need to be careful as logic below may need modification per the
@@ -114,6 +119,15 @@ public abstract class AbstractMediaPlayerFragment extends Fragment implements
 		if (mediaController != null) {
 			mediaController.show();
 		}
+	}
+	
+	public void onAttach(Activity activity){
+		super.onAttach(activity);
+		languageSettings = LanguageSettings.getInstance(activity);
+	}
+	public void onDetach(){
+		super.onDetach();
+		languageSettings = null;
 	}
 
 
@@ -212,8 +226,10 @@ public abstract class AbstractMediaPlayerFragment extends Fragment implements
 			wifiLock.acquire();
 		} else {
 			// assume file on device
-			File file = new File(Environment.getExternalStorageDirectory() + "/"
-					+ Environment.DIRECTORY_DOWNLOADS + "/" + mediaDirectory
+//			File file = new File(Environment.getExternalStorageDirectory() + "/"
+//					+ Environment.DIRECTORY_DOWNLOADS + "/" + mediaDirectory
+//					+ File.separator + mediaFile);
+			File file = new File(languageSettings.getMediaDirectory() + "/" + mediaDirectory
 					+ File.separator + mediaFile);
 			datasource = "file:///" + file.getAbsolutePath();
 

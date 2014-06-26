@@ -376,12 +376,18 @@ public class LessonPhraseFragment extends ListFragment implements
 									.getTeacherLanguageId())).unique();
 		}
 		if (teacherLanguage != null) {
-			learningLanguageDirectory = Environment.getExternalStorageDirectory()
-					+ "/" + Environment.DIRECTORY_DOWNLOADS + "/"
+			// switch to where the media was loaded
+			String mediaDirectory = languageSettings.getMediaDirectory();
+			learningLanguageDirectory = mediaDirectory + "/"
 					+ teacherLanguage.getLearningLanguageMediaDirectory();
-			knownLanguageDirectory = Environment.getExternalStorageDirectory()
-					+ "/" + Environment.DIRECTORY_DOWNLOADS + "/"
+			knownLanguageDirectory = mediaDirectory + "/"
 					+ teacherLanguage.getKnownLanguageMediaDirectory();
+			//learningLanguageDirectory = Environment.getExternalStorageDirectory()
+			//		+ "/" + Environment.DIRECTORY_DOWNLOADS + "/"
+			//		+ teacherLanguage.getLearningLanguageMediaDirectory();
+			//knownLanguageDirectory = Environment.getExternalStorageDirectory()
+			//		+ "/" + Environment.DIRECTORY_DOWNLOADS + "/"
+			//		+ teacherLanguage.getKnownLanguageMediaDirectory();
 		}
 	}
 
