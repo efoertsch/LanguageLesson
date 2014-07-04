@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools"
-  tools:ignore="MissingTranslation" >
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="a_lesson_must_be_selected_first">A lesson must be selected first.</string>
     <string name="a_class_must_be_selected_first">A lesson must be selected first.</string>
@@ -11,6 +10,7 @@
     <string name="about_string_4">\nThe steps to create your own set of language lessons are at http://fisincorporated.com/language-lesson/\n\nPlease email Eric Foertsch (efoertsch@fisincorporated.com) with bug reports or enhancement requests.</string>
     <string name="action_settings">Settings</string>
     <string name="app_name">LanguageLesson</string>
+    <string name="app_label">LanguageLesson</string>
     <string name="audio">Audio</string>
     <string name="audio_image">Audio image</string>
     <string name="audio_options_saved">Audio options saved. Press back to return.</string>
@@ -95,6 +95,7 @@
     <string name="language_phrase_xref_missing_for_lesson_phrase">LessonPhrase %1$s from Class: %2$s, Lesson: %3$s, Order: %4$s, Speaker:%5$s may not be listed in column A on the LanguagePhrase tab in the spreadsheet. Please check and recreate the file.</string>
     <string name="language_phrase_missing_for_lesson_phrase2">The %1$d line of the lesson is missing the language phrase. Error info - teacher: %2$s, class: %3$s, lesson: %4$s. Database may be corrupt. Try reloading the language file.</string>
     <string name="language_phrase_xref_missing_for_lesson_phrase2">The %1$d line of the lesson is missing a crossreference to the phrase. Error info - teacher: %2$s, class: %3$s, lesson: %4$s. Database may be corrupt. Try reloading the language file.</string>
+    <string name="language_search_results">Search Results</string>
     <string name="language_to_be_learned">Language to be learned</string>
     <string name="languagelesson_txt">turkish_language_demo.txt</string>
     <string name="languagetutorial_txt_not_found">The %1$s file could not be found. It should be in: %2$s.</string>
@@ -168,7 +169,6 @@
     <string name="press_load_or_cancel">Press Load to load language file or Cancel</string>
     <string name="press_restore_to_restore">The restore will overwrite your existing activity database. Press Restore to continue else cancel"</string>
     <string name="press">Press</string>
-    <string name="prev">Prev</string>
     <string name="previous">Previous</string>
     <string name="reset">Reset</string>
     <string name="repeat">Repeat</string>
@@ -183,6 +183,8 @@
     <string name="sample_text">Sample Text 12345</string>
     <string name="save">Save</string>
     <string name="save_option_changes_question">Save Options Changes?</string>
+    <string name="search">Search</string>
+    <string name="search_hint">Search LanguageLesson</string>
     <string name="select">Select</string>
     <string name="select_lesson">Select Lesson</string>
     <string name="select_lesson_options">Select Lesson Options</string>

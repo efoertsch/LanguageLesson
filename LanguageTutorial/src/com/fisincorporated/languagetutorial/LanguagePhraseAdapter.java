@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
@@ -41,6 +42,7 @@ public class LanguagePhraseAdapter extends ArrayAdapter<LanguagePhrase> {
 		public LinearLayout llPhraseDetail;
 		public TextView tvNumber;
 		public TextSwitcher txtswtchrTvPhrase;
+		public ImageView audioIconImage;
 	}
 
 	// textViewResourceId should be the detail row view (containing other
@@ -96,11 +98,13 @@ public class LanguagePhraseAdapter extends ArrayAdapter<LanguagePhrase> {
              }
          });
 			viewHolder.tvNumber = (TextView) rowView.findViewById(R.id.tvNumber);
+			viewHolder.audioIconImage = (ImageView) rowView.findViewById(R.id.ivAudioImage);
 			rowView.setTag(viewHolder);
 		 }
-
+		 
 		LanguagePhraseAdapter.LanguagePhraseViewHolder viewHolder = (LanguagePhraseAdapter.LanguagePhraseViewHolder) rowView
 				.getTag();
+		viewHolder.audioIconImage.setTag((Integer) position);
 		// fill in all the blanks
 		lessonLineCallback.onAssignLessonLineText(viewHolder, position);
 		parent.requestLayout();

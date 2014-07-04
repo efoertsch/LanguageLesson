@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextSwitcher;
@@ -688,22 +689,7 @@ public class LessonPhraseFragment extends ListFragment implements
 			getActivity().finish();
 			return;
 		}
-		// if (requestCode == SELECT_LESSON) {
-		// int buttonPressed = intent.getIntExtra(
-		// LessonSelectionDialog.LESSON_DIALOG_RESPONSE, -1);
-		// if (buttonPressed == DialogInterface.BUTTON_POSITIVE) {
-		// startNewLesson();
-		//
-		// } else if (buttonPressed == DialogInterface.BUTTON_NEGATIVE) {
-		// // User cancelled so see if already on lesson and if so stay on it
-		// if (-1 != lessonId)
-		// return;
-		// else
-		// Toast.makeText(getActivity(),
-		// R.string.no_lesson_selected_use_menu_to_select,
-		// Toast.LENGTH_LONG).show();
-		// }
-		// }
+		
 	}
 
 	public void startNewLesson() {
@@ -776,7 +762,22 @@ public class LessonPhraseFragment extends ListFragment implements
 		viewHolder.txtswtchrTvPhrase.setCurrentText(getDisplayText(position));
 		viewHolder.tvNumber.setTextSize(TypedValue.COMPLEX_UNIT_PX,
 				phraseTextSize);
-
+		if (!playAudioWhenAvailable){
+			viewHolder.audioIconImage.setVisibility(View.VISIBLE);
+			viewHolder.audioIconImage.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					Log.i(TAG, "Onclick on ImageView position" + v.getTag());
+					playLearningLanguagePhrase((Integer)v.getTag());
+					
+				}});
+		}
+		else {
+			viewHolder.audioIconImage.setVisibility(View.GONE);
+		}
+			
+		 
 		// if lesson is number lesson
 		if (lesson != null
 				&& lesson.getLessonType().equalsIgnoreCase(GlobalValues.NUMBER)) {
@@ -817,6 +818,13 @@ public class LessonPhraseFragment extends ListFragment implements
 			tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, phraseTextSize);
 		}
 
+	}
+	
+	private void playLearningLanguagePhrase(int position){
+		PhrasePlayRequest phrasePlayRequest = new PhrasePlayRequest(learningLanguageDirectory,
+				learningLanguagePhraseList.get(position).getMediaFile(), 0,	0);
+		languagePhrasePlayer.queuePlayRequest(
+				LanguagePhrasePlayer.PLAY_PHRASE, phrasePlayRequest);
 	}
 
 	private String getDisplayText(int position) {

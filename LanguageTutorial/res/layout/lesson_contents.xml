@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:enabled="true"
-            android:text="@string/prev"
+            android:text="@string/previous"
             android:visibility="visible" />
         
           <Button

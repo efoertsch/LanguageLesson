@@ -21,6 +21,10 @@
         android:icon="@drawable/languageicon"
         android:label="@string/app_name"
         android:theme="@style/Theme.Languagelessonstyle1" >
+        <meta-data
+            android:name="android.app.default_searchable"
+            android:value="com.fisincorporated.languagetutorial.utility.SearchActivity" />
+
         <activity
             android:name="com.fisincorporated.languagetutorial.StartupButtonsActivity"
             android:label="@string/app_name"
@@ -31,6 +35,7 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -112,11 +117,33 @@
                 android:name="android.support.UI_OPTIONS"
                 android:value="splitActionBarWhenNarrow" />
         </activity>
+        <activity
+            android:name="com.fisincorporated.languagetutorial.utility.SearchActivity"
+            android:launchMode="singleTop"
+            android:parentActivityName="com.fisincorporated.languagetutorial.StartupButtonsActivity"
+            android:uiOptions="splitActionBarWhenNarrow" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.fisincorporated.languagetutorial.StartupButtonsActivity" />
+            <meta-data
+                android:name="android.support.UI_OPTIONS"
+                android:value="splitActionBarWhenNarrow" />
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
 
         <service
             android:name=".LanguageMaintenanceService"
             android:exported="false" />
+
+        <provider
+            android:name=".utility.MySuggestionProvider"
+            android:authorities="com.fisincorporated.languagetutorial.utility.MySuggestionProvider" />
     </application>
-    <!-- activity android:name="com.fisincorporated.languagetutorial.LoadLanguageActivity" /> -->
 
 </manifest>

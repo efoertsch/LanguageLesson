@@ -1,14 +1,23 @@
 package com.fisincorporated.languagetutorial;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.SearchManager;
+import android.app.SearchableInfo;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.SearchView.OnQueryTextListener;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -23,6 +32,7 @@ import com.fisincorporated.languagetutorial.interfaces.IHandleSelectedAction;
 import com.fisincorporated.languagetutorial.interfaces.IPauseMedia;
 import com.fisincorporated.languagetutorial.mediaplayers.MediaPlayerFragmentFactory;
 import com.fisincorporated.languagetutorial.utility.LanguageSettings;
+import com.fisincorporated.languagetutorial.utility.SearchActivity;
 
 // display lesson list and lesson phrase fragments (for large screen)
 // or lesson phrase fragment for small screen.
@@ -30,32 +40,24 @@ import com.fisincorporated.languagetutorial.utility.LanguageSettings;
 // or teacher/language/class/lesson (for small screens) not defined
 // show the lesson selection dialog first
 
+// TODO refactor up to MasterActivity
 public class LessonListActivity extends ActionBarActivity implements
 		IHandleSelectedAction, IDialogResultListener,
 		ActionBar.OnMenuVisibilityListener {
-
-	// private static final String LESSON_V_OR_A = "lessonVorA";
-	// private static final String LESSON_TEXT = "lessonText";
-	// private static final String LESSON_FRAGMENT = "LessonFragment";
+	protected static final String TAG = "LessonListActivity";
 	private static final String MASTER_CONTAINER = "MasterContainer";
 	private static final String CHILD_CONTAINER = "ChildContainer";
 	private static LanguageSettings languageSettings;
 	private LessonSelectionDialog lessonSelectionDialog;
-	// private LessonPhraseFragment lessonPhraseFragment = null;
 	private LessonListFragment lessonListFragment;
-
 	private boolean onLargeScreen = false;
-
-	// private DaoMaster daoMaster;
 	private DaoSession daoSession;
-	// private LessonDao lessonDao;
 	private Lesson lesson;
 	private Long lessonId;
 	private ClassName className;
 	private Long classId;
-
-	// private Long lessonId = -1l;
-	// private Lesson lesson = null;
+	private SearchView searchView = null;
+	private SearchManager searchManager = null;
 
 	public LessonListActivity() {
 	}
@@ -63,7 +65,6 @@ public class LessonListActivity extends ActionBarActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_masterdetail);
-
 		// see if large or small screen (via if detailFragmentContainer exists in
 		// layout)
 		onLargeScreen = (findViewById(R.id.detailFragmentContainer) != null) ? true
@@ -234,9 +235,45 @@ public class LessonListActivity extends ActionBarActivity implements
 	}
 
 	// Add the menu - Will add to any menu items added by parent activity
+	@Override
+	@TargetApi(11)
 	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			getMenuInflater().inflate(R.menu.search_menu, menu);
+			searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+			// Pull out search view
+			MenuItem searchItem = menu.findItem(R.id.menu_item_search);
+			searchView = (SearchView) searchItem.getActionView();
+			// Get data from searchable.xml as Searchable info
+			searchView.setOnQueryTextListener(new OnQueryTextListener() {
+				@Override
+				public boolean onQueryTextChange(String arg0) {
+					// TODO Auto-generated method stub
+					return false;
+				}
+				@Override
+				public boolean onQueryTextSubmit(String query) {
+					Log.i(TAG, "Got click on search submit");
+					doSearch(query);
+					return true;
+				}
+			});
+
+			ComponentName name = getComponentName();
+			SearchableInfo searchInfo = searchManager.getSearchableInfo(name);
+			searchView.setSearchableInfo(searchInfo);
+		}
 		getMenuInflater().inflate(R.menu.select_tutorial, menu);
 		return true;
+	}
+	
+	public void doSearch(String query){
+		Intent intent = new Intent(this,SearchActivity.class);
+		intent.setAction(Intent.ACTION_SEARCH);
+		intent.putExtra(SearchManager.QUERY, query);
+		startActivity(intent);
 	}
 
 	// handle the selected menu option
@@ -245,7 +282,9 @@ public class LessonListActivity extends ActionBarActivity implements
 		case R.id.select_teacher_class_lesson:
 			displayLessonSelectionDialog();
 			return true;
-
+		case R.id.menu_item_search:
+			onSearchRequested();
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}

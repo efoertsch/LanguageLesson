@@ -5,6 +5,7 @@
     android:orientation="vertical"
  >
 
+    <!-- Ignore warning about useless layout. Need this layout to avoid problem with LayoutParams in program logic -->
     <LinearLayout
         android:id="@+id/llPhraseDetail"
         android:layout_width="match_parent"
@@ -16,7 +17,7 @@
             android:id="@+id/tvNumber"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:visibility="gone" />
 		
@@ -24,12 +25,19 @@
             android:id="@+id/txtswtchrTvPhrase"
              android:layout_width="0dp"
               android:layout_height="wrap_content"
-            android:layout_weight="3"
+            android:layout_weight="7"
             android:layout_gravity="center_horizontal"
             android:textAppearance="?android:attr/textAppearanceMedium"
               />
 
-		
+		<ImageView
+		    android:id="@+id/ivAudioImage"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:src="@drawable/audio_icon_small"
+		    android:layout_weight="1"
+		    android:contentDescription="@string/play_audio"
+		     />
         
     </LinearLayout>
 

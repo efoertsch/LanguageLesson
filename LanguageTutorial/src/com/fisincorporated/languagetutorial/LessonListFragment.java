@@ -90,7 +90,7 @@ public class LessonListFragment extends MasterFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		actionBarActivity.getSupportActionBar().setTitle(R.string.lesson);
+		//actionBarActivity.getSupportActionBar().setTitle(R.string.lesson);
 		 highlightedLesson = new View(getActivity());
 		mainView = inflater.inflate(R.layout.lesson_list, container, false);
 		tvTeacherLanguage = (TextView) mainView
@@ -234,8 +234,6 @@ public class LessonListFragment extends MasterFragment {
 			super(getActivity(), android.R.layout.simple_list_item_single_choice,
 					lessonList);
 		}
-
-		 
 
 		@Override
 		// see http://www.vogella.com/tutorials/AndroidListView/article.html for
