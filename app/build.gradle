@@ -1,0 +1,34 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "com.fisincorporated.languagetutorial"
+        minSdkVersion 8
+        targetSdkVersion 19
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    // https://developer.android.com/intl/ru/about/versions/marshmallow/android-6.0-changes.html#behavior-apache-http-client
+    useLibrary 'org.apache.http.legacy'
+
+
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile files('libs/YouTubeAndroidPlayerApi.jar')
+    compile 'de.greenrobot:greendao:1.3.2'
+    compile 'org.apache.commons:commons-compress:1.10'
+    //compile 'org.apache.commons:commons-collections4:4.0'
+    //compile 'org.apache.commons:commons-lang3:3.4'
+    //compile 'commons-net:commons-net:3.3'
+}

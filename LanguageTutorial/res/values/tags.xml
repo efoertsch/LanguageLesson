@@ -1,6 +1,0 @@
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
-  <item name="spnrTeacherPos" type="id" />
-  <item name="spnrTeacherLanguagePos" type="id" />
-  <item name="spnrClassNamePos" type="id" />
-  <item name="spnrLessonPos" type="id" />
-</resources>

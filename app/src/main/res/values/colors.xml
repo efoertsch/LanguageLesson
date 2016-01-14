@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#00000000</color>
+    <color name="light_yellow">#FFFFFBC6</color>
+    <color name="light_green">#FFE0EDC5</color>
+    <color name="light_blue">#FFBFE2F9</color>
+    <color name="light_red">#FFF9C7C2</color>
+    <color name="solid_blue">#FF0000FF</color>
+    <color name="light_grey_divider">#FFCCCCCC</color>
+    <color name="darker_grey">#80A0A0A0</color>
+
+    <!--  for list selected pressed/default colors -->
+    <color name="lesson_selection">#FF7BCFEE</color>
+    <color name="lesson_selection_green">#FF99CC00</color>
+    <color name="pressed_color">#004d90fe</color>
+    <color name="default_color">#80ffffff</color>
+
+
+    <item name="blue" type="color">#FF33B5E5</item>
+
+    <!-- following is from material design color pallet https://www.google.com/design/spec/style/color.html#color-color-palette -->
+    <!-- blue '500' color -->
+    <item name="colorPrimary" type="color">#03A9F4</item>
+    <!-- blue '700' color -->
+    <item name="colorPrimaryDark" type="color">#0288D1</item>
+    <!-- blue '300' color -->
+    <item name="colorPrimaryLight" type="color">#4FC3F7</item>
+    <!-- blue-gray '500' color -->
+    <item name="colorAccent" type="color">#607D8B</item>
+</resources>
