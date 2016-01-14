@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+ <!--    <include
+        android:id="@+id/includerlSaveCancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        layout="@layout/save_cancel_buttons" />
+        if you back out this change this next lines goes into ScrollView
+        android:layout_above="@+id/includerlSaveCancel" 
+         -->
+        
+       <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            
+            android:layout_alignParentTop="true" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:scrollbarAlwaysDrawVerticalTrack="true"
+                android:scrollbarStyle="outsideOverlay"
+                android:scrollbars="vertical" >
+
+                <View style="@style/Divider" />
+
+                <RelativeLayout
+                    android:id="@+id/rlDisplayKnownPhrase"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/default_gap" >
+
+                    <CheckBox
+                        android:id="@+id/cbxDisplayKnownPhraseAvailable"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:text="@string/display_known_phrase_when_available" />
+
+                    <RadioGroup
+                        android:id="@+id/rgBeforeAfter"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/cbxDisplayKnownPhraseAvailable"
+                        android:orientation="vertical"
+                        android:paddingLeft="@dimen/gap_8dp" >
+
+                        <RadioButton
+                            android:id="@+id/rbtnBeforeLearningPhrase"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/before_learning_phrase" />
+
+                        <RadioButton
+                            android:id="@+id/rbtnAfterLearningPhrase"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/after_learning_phrase" />
+                    </RadioGroup>
+                </RelativeLayout>
+
+                <View style="@style/Divider" />
+
+                <RelativeLayout
+                    android:id="@+id/rlTextSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/default_gap" >
+
+                    <TextView
+                        android:id="@+id/tvSetTextSize"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:text="@string/set_lesson_text_size"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                    <TextView
+                        android:id="@+id/tvSampleText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tvSetTextSize"
+                        android:paddingLeft="@dimen/gap_32dp"
+                        android:text="@string/sample_text"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                    <ImageButton
+                        android:id="@+id/imgbtnDecreaseTextSize"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_below="@+id/tvSampleText"
+                        android:accessibilityLiveRegion="polite"
+                        android:background="@drawable/rectangle_with_border"
+                        android:contentDescription="@string/decrease_text_size"
+                        android:padding="2dp"
+                        android:src="@drawable/icon_minus" />
+
+                    <ImageButton
+                        android:id="@+id/imgbtnIncreaseTextSize"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignBottom="@+id/imgbtnDecreaseTextSize"
+                        android:layout_alignTop="@+id/imgbtnDecreaseTextSize"
+                        android:layout_toRightOf="@+id/imgbtnDecreaseTextSize"
+                        android:accessibilityLiveRegion="polite"
+                        android:background="@drawable/rectangle_with_border"
+                        android:contentDescription="@string/increase_text_size"
+                        android:src="@drawable/icon_plus" />
+                </RelativeLayout>
+            </LinearLayout>
+        </ScrollView>
+     
+
+</RelativeLayout>
