@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.databinding.ObservableArrayList"/>
+        <import type="android.view.View"/>
+        <import type="com.fisincorporated.airportweather.metars.Metar"/>
+        <variable
+            name="metars"
+            type="ObservableArrayList&lt;Metar&gt;"/>
+        <variable
+            name="viewmodel"
+            type="com.fisincorporated.airportweather.AirportWeatherViewModel"/>
+    </data>
+
+    <RelativeLayout
+        android:id="@+id/activity_weather_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:visibility='@{metars.size() > 0 ? View.GONE : View.VISIBLE}'/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/activity_metar_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:items="@{viewmodel.metars}"
+            app:itemViewBinder="@{viewmodel.itemViewBinder}"/>
+
+    </RelativeLayout>
+
+</layout>
