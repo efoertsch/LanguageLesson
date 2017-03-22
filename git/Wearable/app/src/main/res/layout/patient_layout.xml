@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View"/>
+
+        <variable
+            name="patient"
+            type="com.fisincorporated.wearable.Patient"/>
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/patient_patientName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="@{patient.name}"
+            tools:text="John Smith"/>
+
+        <TextView
+            android:id="@+id/patient_blood_pressure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{String.format(@string/patient_bp_label, patient.bp)}"
+            tools:text="BP: 120/80"
+            />
+
+        <!-- Databinding gets confused with field id:patient_pulse and class field patient.pulse
+         so making textview id a different name -->
+        <TextView
+            android:id="@+id/patient_heart_rate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{String.format(@string/patient_pulse_label, safeUnbox(patient.pulse))}"
+            tools:text="Pulse: 72"/>
+
+    </LinearLayout>
+</layout>
